@@ -105,6 +105,7 @@ __pypackages__/
 #*.sage.py
 
 # Environments
+*.flaskenv
 *.env
 */*.env
 *.venv
