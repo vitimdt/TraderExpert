@@ -23,13 +23,12 @@ class BuscaCotacoes:
             self.dbConn.createConnection(os.getenv("STR_CONN"))
 
     def iniciarColetaCotacoes(self):
-        ''' Verificando hora do dia para iniciar o processo de Coleta '''
-        dataHora = self.dateTimeNow()
-        CotacaoTempoReal.clear_table(conn=self.dbConn.conn, dataAtual=dataHora)
-        while 10 <= dataHora.hour <= 18:
+        data_hora = self.dateTimeNow()
+        CotacaoTempoReal.clear_table(conn=self.dbConn.conn, dataAtual=data_hora)
+        while 10 <= data_hora.hour <= 18:
             self.coletar_cotacoes()
             time.sleep(1800)
-            dataHora = self.dateTimeNow()
+            data_hora = self.dateTimeNow()
         self.dbConn.disposeConnection()
 
     def coletar_cotacoes(self):
@@ -40,13 +39,16 @@ class BuscaCotacoes:
         for op in cart:
             url = config.valor.format(op.acao.nome_api)
             response = self.http.request('GET', url, headers)
-            horaPregao = self.extrairHoraAtualizacao(response.data.decode('utf-8'))
-            valor = self.extrairValorCotacao(response.data.decode('utf-8'))
-            cotacao = CotacaoTempoReal(acao_id=op.acao.id,
-                                       valor=float(valor.replace(',', '.')),
-                                       data_atualizacao=self.dateTimeNow(),
-                                       hora_pregao=horaPregao)
-            self.dbConn.session.add(cotacao)
+            hora_pregao = self.extrairHoraAtualizacao(response.data.decode('utf-8'))
+            try:
+                valor = self.extrairValorCotacao(response.data.decode('utf-8'))
+                cotacao = CotacaoTempoReal(acao_id=op.acao.id,
+                                           valor=float(valor.replace(',', '.')),
+                                           data_atualizacao=self.dateTimeNow(),
+                                           hora_pregao=hora_pregao)
+                self.dbConn.session.add(cotacao)
+            except:
+                print("Não foi possível recuperar cotação da ação: " + op.acao.codigo)
         self.dbConn.session.commit()
         print("[" + time.ctime() + "] Cotações coletadas com sucesso!")
 
@@ -56,9 +58,12 @@ class BuscaCotacoes:
         return result
 
     def extrairHoraAtualizacao(self, msg):
-        result = re.search(r'[0-9h0-9]+. Delay 15 min', msg).group()
-        result = result.split('.')[0]
-        result = result.replace('h', ':')
+        try:
+            result = re.search(r'[0-9h0-9]+. Delay 15 min', msg).group()
+            result = result.split('.')[0]
+            result = result.replace('h', ':')
+        except:
+            result = ""
         return result
 
     def dateTimeNow(self):
