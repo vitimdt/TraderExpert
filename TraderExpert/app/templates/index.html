@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+	<h1>Carteira em tempo real</h1>
+	<br>
+	<table class="table table-striped" id="users">
+		 <thead>
+		  {%- for column in columns %}
+			 <th>{{ column }}</th>
+		  {%- endfor %}
+		 </thead>
+
+		 <tbody>
+		 {%- for row in items %}
+			<tr>
+			{%- for column in columns %}
+				{% if (column == "Percentual") %}
+					{% if (row[column].find("-") == -1) %}
+						<td style="font-weight:bold; color: red;" >{{ row[column] }}</td>
+					{% else %}
+						<td style="font-weight:bold; color: green;">{{ row[column] }}</td>
+					{% endif %}
+				{% else %}
+					<td>{{ row[column] }}</td>
+				{% endif %}
+			{%- endfor %}
+			</tr>
+		 {%- endfor %}
+		 </tbody>
+ 	</table>
+{% endblock %}
