@@ -1,5 +1,6 @@
 from app import db
 from sqlalchemy.sql import text
+from datetime import datetime
 
 class Acao(db.Model):
     __tablename__ = 'acao'
@@ -67,20 +68,31 @@ class CotacaoTempoReal(db.Model):
                    "WHERE ct.acao_id = a.id and c.acao_id = a.id "
                    "ORDER BY ct.data_atualizacao DESC LIMIT 6) AS tab ORDER BY tab.id")
         columns = ['Código', 'Nome', 'Valor Compra', 'Quantidade', 'Cotação', 'Diferença',
-                   'Investimento', 'Total Cotação', 'Percentual']
+                   'Investimento', 'Total Cotação', 'Percentual', 'Hora Atualização', 'Hora Cotação']
         cotacoesTR = db.engine.execute(qry).fetchall()
         resultSet = []
+        totInvest = 0
+        totCotacao = 0
         for lin in cotacoesTR:
+            totInvest += lin[6]
+            totCotacao += lin[7]
             resultSet.append({columns[0]: lin[0],
                               columns[1]: lin[1],
-                              columns[2]: lin[2],
+                              columns[2]: str(lin[2]).replace('.', ','),
                               columns[3]: lin[3],
-                              columns[4]: lin[4],
-                              columns[5]: lin[5],
-                              columns[6]: lin[6],
-                              columns[7]: lin[7],
-                              columns[8]: lin[8]})
-        return columns, resultSet
+                              columns[4]: str(lin[4]).replace('.', ','),
+                              columns[5]: str(lin[5]).replace('.', ','),
+                              columns[6]: str(lin[6]).replace('.', ','),
+                              columns[7]: str(lin[7]).replace('.', ','),
+                              columns[8]: str(lin[8]).replace('.', ','),
+                              columns[9]: lin[9].strftime("%d/%m/%Y %H:%M:%S"),
+                              columns[10]: lin[10]})
+        totais = []
+        totais.append(str(round(totInvest, 2)).replace('.', ','))
+        totais.append(str(round(totCotacao, 2)).replace('.', ','))
+        totais.append(str(round(totCotacao - totInvest, 2)).replace('.', ','))
+        totais.append(str(round(((totCotacao - totInvest)*100)/totInvest, 2)).replace('.', ','))
+        return columns, resultSet, totais
 
 class Carteira(db.Model):
     __tablename__ = 'carteira'

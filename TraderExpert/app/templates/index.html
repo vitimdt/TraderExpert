@@ -2,8 +2,7 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-	<h1>Carteira em tempo real</h1>
-	<br>
+<h2><b>Carteira - Próximo do Tempo Real</b></h2>
 	<table class="table table-striped" id="users">
 		 <thead>
 		  {%- for column in columns %}
@@ -15,11 +14,11 @@
 		 {%- for row in items %}
 			<tr>
 			{%- for column in columns %}
-				{% if (column == "Percentual") %}
+				{% if (column in ("Diferença", "Percentual")) %}
 					{% if (row[column].find("-") == -1) %}
-						<td style="font-weight:bold; color: red;" >{{ row[column] }}</td>
+						<td style="font-weight:bold; color: green;" >{{ row[column] }}</td>
 					{% else %}
-						<td style="font-weight:bold; color: green;">{{ row[column] }}</td>
+						<td style="font-weight:bold; color: red;">{{ row[column] }}</td>
 					{% endif %}
 				{% else %}
 					<td>{{ row[column] }}</td>
@@ -29,4 +28,21 @@
 		 {%- endfor %}
 		 </tbody>
  	</table>
+	<div class="container">
+		<h3><b>Total Carteira</b></h3>
+		<label>Investimento (R$):&nbsp;</label><span>{{ tot_invest }}</span><br>
+		<label>Total Cotação (R$):&nbsp;</label><span>{{ tot_cotacao }}</span><br>
+		<label>Lucro / Prejuízo (R$):&nbsp;</label>
+		{% if (dif_total.find("-") == -1) %}
+			<span style="color: green;">{{ dif_total }}</span>
+		{% else %}
+			<span style="color: red;">{{ dif_total }}</span>
+		{% endif %}<br>
+		<label>Diferença:&nbsp;</label>
+		{% if (dif_percentual.find("-") == -1) %}
+			<span style="color: green;">{{ dif_percentual }} %</span>
+		{% else %}
+			<span style="color: red;">{{ dif_percentual }} %</span>
+		{% endif %}
+	</div>
 {% endblock %}
