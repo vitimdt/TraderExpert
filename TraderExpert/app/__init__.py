@@ -4,27 +4,28 @@ from flask import Flask
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
+from flask_moment import Moment
 ''' from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_mail import Mail
-from flask_moment import Moment
 from logging.handlers import SMTPHandler, RotatingFileHandler
 '''
 db = SQLAlchemy()
 bootstrap = Bootstrap()
+moment = Moment()
 '''
 migrate = Migrate()
 login = LoginManager()
 login.login_view = 'auth.login'
 login.login_message = _l('Please log in to access this page.')
 mail = Mail()
-moment = Moment()
 '''
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
     db.init_app(app)
     bootstrap.init_app(app)
+    moment.init_app(app)
 
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
@@ -32,8 +33,6 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     login.init_app(app)
     mail.init_app(app)
-    
-    moment.init_app(app)
     babel.init_app(app)
     
     from app.errors import bp as errors_bp
