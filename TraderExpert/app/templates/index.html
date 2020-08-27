@@ -29,7 +29,7 @@
 			{%- for column in columns %}
 				{% if (column in ("Diferença", "Percentual")) %}
 					{% if (row[column].find("-") == -1) %}
-						<td style="font-weight:bold; color: green;" >{{ row[column] }}</td>
+						<td style="font-weight:bold; color: blue;" >{{ row[column] }}</td>
 					{% else %}
 						<td style="font-weight:bold; color: red;">{{ row[column] }}</td>
 					{% endif %}
@@ -47,13 +47,13 @@
 		<label>Total Cotação (R$):&nbsp;</label><span>{{ tot_cotacao }}</span><br>
 		<label>Lucro / Prejuízo (R$):&nbsp;</label>
 		{% if (dif_total.find("-") == -1) %}
-			<span style="color: green;">{{ dif_total }}</span>
+			<span style="color: blue;">{{ dif_total }}</span>
 		{% else %}
 			<span style="color: red;">{{ dif_total }}</span>
 		{% endif %}<br>
 		<label>Diferença:&nbsp;</label>
 		{% if (dif_percentual.find("-") == -1) %}
-			<span style="color: green;">{{ dif_percentual }} %</span>
+			<span style="color: blue;">{{ dif_percentual }} %</span>
 		{% else %}
 			<span style="color: red;">{{ dif_percentual }} %</span>
 		{% endif %}

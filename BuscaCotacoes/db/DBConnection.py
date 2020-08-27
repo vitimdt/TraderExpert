@@ -19,6 +19,7 @@ class DBConnection:
             return True
 
     def disposeConnection(self):
+        self.conn.close()
         self.engine.dispose()
 
     def __repr__(self):
