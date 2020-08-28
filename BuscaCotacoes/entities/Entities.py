@@ -78,3 +78,22 @@ class Carteira(Base):
     @classmethod
     def find_all(cls, session):
         return session.query(cls).all()
+
+class Monitoramento(Base):
+    __tablename__ = 'monitoramento'
+    id = Column(Integer, primary_key=True)
+    acao_id = Column(Integer, ForeignKey('acao.id'))
+    valor_ref = Column(Float)
+    operador = Column(String(2))
+    valor_meta_dif = Column(Float)
+    sugestao = Column(String(50))
+    flg_percentual = Column(String(1))
+    flg_ativo = Column(String(1))
+    acao = relationship('Acao')
+
+    def __repr__(self):
+        return f'Monitoramento {self.acao_id} - {self.valor_ref} - {self.operador} - {self.valor_meta_dif}'
+
+    @classmethod
+    def find_by_ativos(cls, session):
+        return session.query(cls).filter_by(flg_ativo='S').all()

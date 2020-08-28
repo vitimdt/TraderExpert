@@ -65,8 +65,9 @@ class CotacaoTempoReal(db.Model):
                    "CONCAT(round((((ct.valor*c.quantidade) - (c.valor*c.quantidade)) * 100) / "
                    "(c.valor*c.quantidade),2), ' %') as Percentual "
                    "FROM cotacao_temporeal ct, acao a, carteira c "
-                   "WHERE ct.acao_id = a.id and c.acao_id = a.id "
-                   "ORDER BY ct.data_atualizacao DESC LIMIT 6) AS tab ORDER BY tab.id")
+                   "WHERE ct.acao_id = a.id and c.acao_id = a.id and ct.data_atualizacao = "
+                   "(select max(aux.data_atualizacao) from cotacao_temporeal aux where aux.acao_id = a.id) "
+                   ") AS tab ORDER BY tab.id")
         columns = ['Código', 'Nome', 'Valor Compra', 'Quantidade', 'Cotação', 'Diferença',
                    'Investimento', 'Total Cotação', 'Percentual', 'Hora Atualização', 'Hora Cotação']
         cotacoesTR = db.engine.execute(qry).fetchall()
