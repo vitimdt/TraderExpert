@@ -5,7 +5,7 @@ import time
 import os
 from dotenv import load_dotenv
 from db.DBConnection import DBConnection
-from entities.Entities import Configuracao, Carteira, CotacaoTempoReal
+from entities.Entities import Configuracao, Carteira, CotacaoTempoReal, Monitoramento, Acao
 
 class BuscaCotacoes:
 
@@ -27,6 +27,8 @@ class BuscaCotacoes:
         CotacaoTempoReal.clear_table(conn=self.dbConn.conn, dataAtual=data_hora)
         while 10 <= data_hora.hour <= 18:
             self.coletar_cotacoes()
+            self.coletar_cotacoes_monitoramento()
+            print("[" + time.ctime() + "] Cotações coletadas com sucesso!")
             time.sleep(1800)
             data_hora = self.dateTimeNow()
         self.dbConn.disposeConnection()
@@ -50,7 +52,27 @@ class BuscaCotacoes:
             except:
                 print("Não foi possível recuperar cotação da ação: " + op.acao.codigo)
         self.dbConn.session.commit()
-        print("[" + time.ctime() + "] Cotações coletadas com sucesso!")
+
+    def coletar_cotacoes_monitoramento(self):
+        config = Configuracao.find_by_key(self.dbConn.session, self.api_key)
+        listaMonitor = Monitoramento.find_monitoramento_fora_carteira(conn=self.dbConn.conn)
+        headers = {'User-Agent': self.user_agent}
+
+        for monitor in listaMonitor:
+            acao = Acao.find_by_id(self.dbConn.session, monitor.acao_id)
+            url = config.valor.format(acao.nome_api)
+            response = self.http.request('GET', url, headers)
+            hora_pregao = self.extrairHoraAtualizacao(response.data.decode('utf-8'))
+            try:
+                valor = self.extrairValorCotacao(response.data.decode('utf-8'))
+                cotacao = CotacaoTempoReal(acao_id=monitor.acao_id,
+                                           valor=float(valor.replace(',', '.')),
+                                           data_atualizacao=self.dateTimeNow(),
+                                           hora_pregao=hora_pregao)
+                self.dbConn.session.add(cotacao)
+            except:
+                print("Não foi possível recuperar cotação da ação: " + acao.codigo)
+        self.dbConn.session.commit()
 
     def extrairValorCotacao(self, msg):
         result = re.search(r'\<div class\=\"value\"\>\n                                    \<p\>[0-9\,]*\<\/p\>', msg).group()

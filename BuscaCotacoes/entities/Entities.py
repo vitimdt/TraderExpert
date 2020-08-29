@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Date, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.sql import text
 
 Base = declarative_base()
 
@@ -23,6 +24,10 @@ class Acao(Base):
     @classmethod
     def find_by_code(cls, session, codigo):
         return session.query(cls).filter_by(codigo=codigo).first()
+
+    @classmethod
+    def find_by_id(cls, session, id):
+        return session.query(cls).filter_by(id=id).first()
 
 class Configuracao(Base):
     __tablename__ = 'configuracao'
@@ -97,3 +102,13 @@ class Monitoramento(Base):
     @classmethod
     def find_by_ativos(cls, session):
         return session.query(cls).filter_by(flg_ativo='S').all()
+
+    @classmethod
+    def find_monitoramento_fora_carteira(cls, conn):
+        qry = text("select monitoramento.id, monitoramento.acao_id, monitoramento.valor_ref, "
+                   "monitoramento.operador, monitoramento.valor_meta_dif, monitoramento.sugestao, "
+                   "monitoramento.flg_percentual, monitoramento.flg_ativo from monitoramento, acao "
+                   "where monitoramento.acao_id = acao.id and "
+                   "monitoramento.acao_id not in (select c.acao_id from carteira c) and "
+                   "monitoramento.flg_ativo='S'")
+        return conn.execute(qry).fetchall()
