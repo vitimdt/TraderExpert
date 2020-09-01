@@ -14,7 +14,15 @@
 		 {%- for row in items %}
 			<tr>
 			{%- for column in columns %}
-				<td>{{ row[column] }}</td>
+				{% if (column == 'Status') %}
+					{% if (row[column] == 'OK') %}
+						<td style="text-align:center"><img src="{{ url_for('static', filename='green-tick_2.png') }}" alt="OK" style="width:28px;height:28px;"></td>
+					{% else %}
+						<td style="text-align:center"><img src="{{ url_for('static', filename='Sign-Close-icon.png') }}" alt="Não OK" style="width:28px;height:28px;"></td>
+					{% endif %}
+				{% else %}
+					<td>{{ row[column] }}</td>
+				{% endif %}
 			{%- endfor %}
 			</tr>
 		 {%- endfor %}
