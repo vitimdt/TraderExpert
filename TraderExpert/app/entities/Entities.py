@@ -112,3 +112,48 @@ class Carteira(db.Model):
 
     def find_all(self):
         return Carteira.query.all()
+
+class Monitoramento(db.Model):
+    __tablename__ = 'monitoramento'
+    id = db.Column(db.Integer, primary_key=True)
+    acao_id = db.Column(db.Integer, db.ForeignKey('acao.id'))
+    valor_ref = db.Column(db.Float)
+    operador = db.Column(db.String(2))
+    valor_meta_dif = db.Column(db.Float)
+    sugestao = db.Column(db.String(50))
+    flg_percentual = db.Column(db.String(1))
+    flg_ativo = db.Column(db.String(1))
+    acao = db.relationship('Acao')
+
+    def __repr__(self):
+        return f'Monitoramento {self.acao_id} - {self.valor_ref} - {self.operador} - {self.valor_meta_dif}'
+
+    def find_by_ativos(self):
+        return Monitoramento.query.filter_by(flg_ativo='S').all()
+
+    @classmethod
+    def buscaMonitoramentos(cls):
+        qry = text("SELECT a.codigo, a.nome, ct.valor, m.valor_ref, m.operador, m.valor_meta_dif, "
+                   "m.sugestao, ct.data_atualizacao, ct.hora_pregao FROM cotacao_temporeal ct, "
+                   "acao a, monitoramento m WHERE ct.acao_id = a.id AND m.acao_id = a.id AND "
+                   "ct.data_atualizacao = (SELECT MAX(aux.data_atualizacao) "
+                   "FROM cotacao_temporeal aux WHERE aux.acao_id = a.id)")
+        columns = ['Código', 'Nome', 'Valor Cotação', 'Valor Alvo', 'Hora Atualização', "Hora Cotação"]
+        monitores = db.engine.execute(qry).fetchall()
+        resultSet = []
+        for lin in monitores:
+            if str(lin[4]) == '-':
+                resultSet.append({columns[0]: lin[0],
+                                  columns[1]: lin[1],
+                                  columns[2]: str(lin[2]).replace('.', ','),
+                                  columns[3]: str(round(lin[3]-lin[5], 2)).replace('.', ','),
+                                  columns[4]: lin[7].strftime("%d/%m/%Y %H:%M:%S"),
+                                  columns[5]: lin[8]})
+            elif str(lin[4]) == '+':
+                resultSet.append({columns[0]: lin[0],
+                                  columns[1]: lin[1],
+                                  columns[2]: str(lin[2]).replace('.', ','),
+                                  columns[3]: str(round(lin[3] + lin[5], 2)).replace('.', ','),
+                                  columns[4]: lin[7].strftime("%d/%m/%Y %H:%M:%S"),
+                                  columns[5]: lin[8]})
+        return columns, resultSet

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<h2><b>Monitoramento de Ações</b></h2>
+	<table class="table table-striped" id="users">
+		 <thead>
+		  {%- for column in columns %}
+			 <th>{{ column }}</th>
+		  {%- endfor %}
+		 </thead>
+
+		 <tbody>
+		 {%- for row in items %}
+			<tr>
+			{%- for column in columns %}
+				<td>{{ row[column] }}</td>
+			{%- endfor %}
+			</tr>
+		 {%- endfor %}
+		 </tbody>
+ 	</table>
+{% endblock %}
