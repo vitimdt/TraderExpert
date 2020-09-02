@@ -92,7 +92,10 @@ class CotacaoTempoReal(db.Model):
         totais.append(str(round(totInvest, 2)).replace('.', ','))
         totais.append(str(round(totCotacao, 2)).replace('.', ','))
         totais.append(str(round(totCotacao - totInvest, 2)).replace('.', ','))
-        totais.append(str(round(((totCotacao - totInvest)*100)/totInvest, 2)).replace('.', ','))
+        if totInvest > 0:
+            totais.append(str(round(((totCotacao - totInvest)*100)/totInvest, 2)).replace('.', ','))
+        else:
+            totais.append('0,00')
         return columns, resultSet, totais
 
 class Carteira(db.Model):
