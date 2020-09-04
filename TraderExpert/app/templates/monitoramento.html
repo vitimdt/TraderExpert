@@ -1,12 +1,32 @@
 {% extends "base.html" %}
 {% import 'bootstrap/wtf.html' as wtf %}
 
+{% block scripts %}
+  <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+  <script>
+	$(":checkbox").on("click", function(){
+		if ( $(this).prop('checked') ){
+			idSel = $(this).prop('id');
+			$.each($("input[type='checkbox']"), function(id , val){
+				if ($(val).prop('id') != idSel){
+					$(val).prop('checked', false);
+				}
+			});
+		}
+	});
+  </script>
+{% endblock %}
+
 {% block app_content %}
 <h2><b>Monitoramento de Ações</b></h2>
 	<table class="table table-striped" id="users">
 		 <thead>
 		  {%- for column in columns %}
+		  	{% if (column == 'ID') %}
+		  	 <th></th>
+		  	{% else %}
 			 <th>{{ column }}</th>
+		    {% endif %}
 		  {%- endfor %}
 		 </thead>
 
@@ -14,14 +34,18 @@
 		 {%- for row in items %}
 			<tr>
 			{%- for column in columns %}
-				{% if (column == 'Status') %}
-					{% if (row[column] == 'OK') %}
-						<td style="text-align:center"><img src="{{ url_for('static', filename='green-tick_2.png') }}" alt="OK" style="width:28px;height:28px;"></td>
-					{% else %}
-						<td style="text-align:center"><img src="{{ url_for('static', filename='Sign-Close-icon.png') }}" alt="Não OK" style="width:28px;height:28px;"></td>
-					{% endif %}
+				{% if (column == 'ID') %}
+					<td><input type="checkbox" class="custom-control-input" id="idMon_{{ row[column] }}"></td>
 				{% else %}
-					<td>{{ row[column] }}</td>
+					{% if (column == 'Status') %}
+						{% if (row[column] == 'OK') %}
+							<td style="text-align:center"><img src="{{ url_for('static', filename='green-tick_2.png') }}" alt="OK" style="width:28px;height:28px;"></td>
+						{% else %}
+							<td style="text-align:center"><img src="{{ url_for('static', filename='Sign-Close-icon.png') }}" alt="Não OK" style="width:28px;height:28px;"></td>
+						{% endif %}
+					{% else %}
+						<td>{{ row[column] }}</td>
+					{% endif %}
 				{% endif %}
 			{%- endfor %}
 			</tr>

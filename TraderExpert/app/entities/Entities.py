@@ -136,31 +136,32 @@ class Monitoramento(db.Model):
 
     @classmethod
     def buscaMonitoramentos(cls):
-        qry = text("SELECT a.codigo, a.nome, ct.valor, m.valor_ref, m.operador, m.valor_meta_dif, "
+        qry = text("SELECT m.id, a.codigo, a.nome, ct.valor, m.valor_ref, m.operador, m.valor_meta_dif, "
                    "m.sugestao, ct.data_atualizacao, ct.hora_pregao FROM cotacao_temporeal ct, "
                    "acao a, monitoramento m WHERE ct.acao_id = a.id AND m.acao_id = a.id AND "
                    "ct.data_atualizacao = (SELECT MAX(aux.data_atualizacao) "
                    "FROM cotacao_temporeal aux WHERE aux.acao_id = a.id)")
-        columns = ['Código', 'Nome', 'Valor Cotação', 'Valor Alvo', 'Hora Atualização', "Hora Cotação", "Sugestão", "Status"]
+        columns = ['ID', 'Código', 'Nome', 'Valor Cotação', 'Valor Alvo', 'Hora Atualização', "Hora Cotação", "Sugestão", "Status"]
         monitores = db.engine.execute(qry).fetchall()
         resultSet = []
         for lin in monitores:
             valor_alvo = 0
             status = "NOK"
-            if str(lin[4]) == '-':
-                valor_alvo = round(lin[3] - lin[5], 2)
-            elif str(lin[4]) == '+':
-                valor_alvo = round(lin[3] + lin[5], 2)
-            if (lin[8] == "COMPRA") and (lin[2] < valor_alvo):
+            if str(lin[5]) == '-':
+                valor_alvo = round(lin[4] - lin[6], 2)
+            elif str(lin[5]) == '+':
+                valor_alvo = round(lin[4] + lin[6], 2)
+            if (lin[9] == "COMPRA") and (lin[3] < valor_alvo):
                 status = "OK"
-            elif (lin[8] == "VENDA") and (lin[2] > valor_alvo):
+            elif (lin[9] == "VENDA") and (lin[3] > valor_alvo):
                 status = "OK"
-            resultSet.append({columns[0]: lin[0],
+            resultSet.append({columns[0]: str(lin[0]),
                               columns[1]: lin[1],
-                              columns[2]: str(lin[2]).replace('.', ','),
-                              columns[3]: str(valor_alvo).replace('.', ','),
-                              columns[4]: lin[7].strftime("%d/%m/%Y %H:%M:%S"),
-                              columns[5]: lin[8],
-                              columns[6]: lin[6],
-                              columns[7]: status})
+                              columns[2]: lin[2],
+                              columns[3]: str(lin[3]).replace('.', ','),
+                              columns[4]: str(valor_alvo).replace('.', ','),
+                              columns[5]: lin[8].strftime("%d/%m/%Y %H:%M:%S"),
+                              columns[6]: lin[9],
+                              columns[7]: lin[7],
+                              columns[8]: status})
         return columns, resultSet
