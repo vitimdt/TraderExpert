@@ -3,11 +3,15 @@
 
 {% block app_content %}
     <h2><b>Configurar Monitoramento</b></h2>
-    <form action="" method="post">
+    <form action="" method="POST">
         {{ form.hidden_tag() }}
         <p>
             {{ form.acao.label }}<br>
-            {{ form.acao(size=1) }}<br>
+            {% if (form.novo == True) %}
+                {{ form.acao(size=1) }}<br>
+            {% else %}
+                {{ form.acao(size=1, disabled = True) }}<br>
+            {% endif %}
         </p>
         <p>
             {{ form.valor_ref.label }}<br>

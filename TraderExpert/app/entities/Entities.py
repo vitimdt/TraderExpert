@@ -17,6 +17,13 @@ class Acao(db.Model):
     def find_all(self):
         return Acao.query.all()
 
+    def retorna_lista_acoes(self):
+        acoes = Acao.query.all()
+        lista = []
+        for acao in acoes:
+            lista.append((acao.id, acao.nome))
+        return lista
+
     def find_by_code(self, codigo):
         return Acao.query.filter_by(codigo=codigo).first()
 
@@ -133,6 +140,9 @@ class Monitoramento(db.Model):
 
     def find_by_ativos(self):
         return Monitoramento.query.filter_by(flg_ativo='S').all()
+
+    def find_by_id(self, id_monitoramento):
+        return Monitoramento.query.filter_by(id=id_monitoramento).first()
 
     @classmethod
     def buscaMonitoramentos(cls):

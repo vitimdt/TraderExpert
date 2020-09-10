@@ -1,7 +1,9 @@
-from flask import render_template, request, url_for, redirect
+from flask import render_template, request, url_for, redirect, flash
+from app import db
 from app.main import bp
 from app.entities.Entities import CotacaoTempoReal, Monitoramento
 from app.main.forms.configMonitorForm import ConfigMonitorForm
+from app.main.forms.monitoramentoForm import MonitoramentoForm
 
 @bp.route('/traderexpert/', methods=['GET'])
 @bp.route('/traderexpert/index', methods=['GET'])
@@ -13,22 +15,45 @@ def index():
 
 @bp.route('/traderexpert/monitor', methods=['GET'])
 def monitor():
+    form = MonitoramentoForm()
     cols, rs = Monitoramento.buscaMonitoramentos()
-    return render_template('monitoramento.html', title='Monitoramento Ações', columns=cols, items=rs)
+    return render_template('monitoramento.html', title='Monitoramento Ações', form=form, columns=cols, items=rs)
 
-@bp.route('/traderexpert/config_monitor', methods=['GET', 'POST'])
-def config_monitor():
-    titulo = 'ConfigMonitor-' + str(request.form['monitorSel'])
-    monitorForm = ConfigMonitorForm()
-    if monitorForm.validate_on_submit():
-        # current_user.username = form.username.data
-        # current_user.about_me = form.about_me.data
-        # db.session.commit()
-        # flash(_('Your changes have been saved.'))
-        return redirect(url_for('main.monitor'))
+@bp.route('/traderexpert/configmonitor', methods=['GET', 'POST'])
+def configmonitor():
+    monitor_form = ConfigMonitorForm()
+    obj_monitoramento = Monitoramento()
+    monitoramento = None
+    id = "0"
+    params = request.args
+    if "monitorSel" in params:
+        monitorsel = params["monitorSel"]
+        if monitorsel != "0":
+            id = str(monitorsel).split('_')[1]
+    if monitor_form.validate_on_submit():
+        if id != "0":
+            monitoramento = obj_monitoramento.find_by_id(id_monitoramento=int(id))
+        else:
+            monitoramento = Monitoramento()
+        monitoramento.acao_id = monitor_form.acao.data
+        monitoramento.valor_ref = monitor_form.valor_ref.data.replace(',', '.')
+        monitoramento.operador = monitor_form.operador.data
+        monitoramento.valor_meta_dif = monitor_form.valor_dif.data.replace(',', '.')
+        monitoramento.sugestao = monitor_form.sugestao.data
+        monitoramento.flg_percentual = monitor_form.percentual.data
+        monitoramento.flg_ativo = monitor_form.ativo.data
+        db.session.commit()
+        flash('Suas alterações foram gravadas com sucesso.')
+        return redirect(url_for('main.configmonitor'))
     elif request.method == 'GET':
-        print("GET Tela ConfigMonitor")
-        # form.username.data = current_user.username
-        # form.about_me.data = current_user.about_me
-
-    return render_template('configMonitoramento.html', title=titulo, form=monitorForm)
+        if id != "0":
+            monitoramento = obj_monitoramento.find_by_id(id_monitoramento=int(id))
+            monitor_form.novo = False
+            monitor_form.acao.data = str(monitoramento.acao_id)
+            monitor_form.valor_ref.data = str(monitoramento.valor_ref).replace('.', ',')
+            monitor_form.operador.data = monitoramento.operador
+            monitor_form.valor_dif.data = str(monitoramento.valor_meta_dif).replace('.', ',')
+            monitor_form.sugestao.data = monitoramento.sugestao
+            monitor_form.percentual.data = monitoramento.flg_percentual
+            monitor_form.ativo.data = monitoramento.flg_ativo
+    return render_template('configMonitoramento.html', title='Configurar Monitoramento', form=monitor_form)

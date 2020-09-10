@@ -20,7 +20,7 @@
 
 {% block app_content %}
 <h2><b>Monitoramento de Ações</b></h2>
-	<form action="{{ url_for('main.config_monitor') }}" method="POST">
+	<form action="{{ url_for('main.configmonitor') }}" method="GET">
 		<table class="table table-striped" id="users">
 			 <thead>
 			  {%- for column in columns %}
@@ -54,7 +54,7 @@
 			 {%- endfor %}
 			 </tbody>
 		</table>
-		<input type="hidden" id="monitorSel" name="monitorSel" value="0">
-		<input type="submit" value="Configurar Monitoramento">
+		{{ form.monitorSel() }}
+		<p>{{ form.submit() }}</p>
 	</form>
 {% endblock %}

@@ -1,22 +1,23 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Regexp
+from app.entities.Entities import Acao, Monitoramento
 
 
 class ConfigMonitorForm(FlaskForm):
-    listaAcoes = [('1', 'Ambev ON'), ('2', 'Petrobras PN'), ('3', 'Via Varejo ON')]
-    acao = SelectField('Ação', choices=listaAcoes, validators=[DataRequired()])
-    valor_ref = StringField('Valor de Referência', validators=[DataRequired()])
+    acao = SelectField('Ação', validators=[DataRequired()])
+    valor_ref = StringField('Valor de Referência', validators=[DataRequired(), Regexp(r'^[0-9]+(\,[0-9]{1,2})?$')])
     operador = SelectField('Operador', choices=[('-', '-'), ('+', '+')], validators=[DataRequired()])
-    valor_dif = StringField('Valor de Referência', validators=[DataRequired()])
+    valor_dif = StringField('Valor de Referência', validators=[DataRequired(), Regexp(r'^[0-9]+(\,[0-9]{1,2})?$')])
     sugestao = SelectField('Sugestao', choices=[('COMPRA', 'COMPRAR'), ('VENDA', 'VENDER')], validators=[DataRequired()])
     percentual = SelectField('Percentual', choices=[('N', 'Não'), ('S', 'Sim')], validators=[DataRequired()])
     ativo = SelectField('Ativo', choices=[('N', 'Não'), ('S', 'Sim')], validators=[DataRequired()])
     submit = SubmitField('Salvar')
+    novo = None
 
     def __init__(self, *args, **kwargs):
         super(ConfigMonitorForm, self).__init__(*args, **kwargs)
-        # self.original_username = original_username
-
-    def validate_acao(self, acao):
-        print("Ação: " + str(acao.data))
+        obj_acao = Acao()
+        lista_acoes = obj_acao.retorna_lista_acoes()
+        self.acao.choices = lista_acoes
+        self.novo = True
