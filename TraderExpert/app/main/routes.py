@@ -30,6 +30,8 @@ def configmonitor():
         monitorsel = params["monitorSel"]
         if monitorsel != "0":
             id = str(monitorsel).split('_')[1]
+        else:
+            id = "0"
     if monitor_form.validate_on_submit():
         if id != "0":
             monitoramento = obj_monitoramento.find_by_id(id_monitoramento=int(id))
@@ -42,6 +44,8 @@ def configmonitor():
         monitoramento.sugestao = monitor_form.sugestao.data
         monitoramento.flg_percentual = monitor_form.percentual.data
         monitoramento.flg_ativo = monitor_form.ativo.data
+        if id == "0":
+            db.session.add(monitoramento)
         db.session.commit()
         flash('Suas alterações foram gravadas com sucesso.')
         return redirect(url_for('main.configmonitor'))

@@ -7,11 +7,7 @@
         {{ form.hidden_tag() }}
         <p>
             {{ form.acao.label }}<br>
-            {% if (form.novo == True) %}
-                {{ form.acao(size=1) }}<br>
-            {% else %}
-                {{ form.acao(size=1, disabled = True) }}<br>
-            {% endif %}
+            {{ form.acao(size=1) }}<br>
         </p>
         <p>
             {{ form.valor_ref.label }}<br>

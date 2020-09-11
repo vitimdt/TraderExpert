@@ -150,7 +150,7 @@ class Monitoramento(db.Model):
                    "m.sugestao, ct.data_atualizacao, ct.hora_pregao FROM cotacao_temporeal ct, "
                    "acao a, monitoramento m WHERE ct.acao_id = a.id AND m.acao_id = a.id AND "
                    "ct.data_atualizacao = (SELECT MAX(aux.data_atualizacao) "
-                   "FROM cotacao_temporeal aux WHERE aux.acao_id = a.id)")
+                   "FROM cotacao_temporeal aux WHERE aux.acao_id = a.id) AND m.flg_ativo = 'S'")
         columns = ['ID', 'Código', 'Nome', 'Valor Cotação', 'Valor Alvo', 'Hora Atualização', "Hora Cotação", "Sugestão", "Status"]
         monitores = db.engine.execute(qry).fetchall()
         resultSet = []
@@ -161,9 +161,9 @@ class Monitoramento(db.Model):
                 valor_alvo = round(lin[4] - lin[6], 2)
             elif str(lin[5]) == '+':
                 valor_alvo = round(lin[4] + lin[6], 2)
-            if (lin[9] == "COMPRA") and (lin[3] < valor_alvo):
+            if (lin[7] == "COMPRA") and (lin[3] < valor_alvo):
                 status = "OK"
-            elif (lin[9] == "VENDA") and (lin[3] > valor_alvo):
+            elif (lin[7] == "VENDA") and (lin[3] > valor_alvo):
                 status = "OK"
             resultSet.append({columns[0]: str(lin[0]),
                               columns[1]: lin[1],
