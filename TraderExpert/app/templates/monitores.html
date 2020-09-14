@@ -19,8 +19,7 @@
 {% endblock %}
 
 {% block app_content %}
-<h2><b>Monitoramento de Ações</b></h2>
-	<a href="{{ url_for('main.todosmonitores') }}">Visualizar todos monitoramentos</a><br><br>
+<h2><b>Todos Monitoramentos</b></h2>
 	<form action="{{ url_for('main.configmonitor') }}" method="GET">
 		<table class="table table-striped" id="users">
 			 <thead>
@@ -40,15 +39,7 @@
 					{% if (column == 'ID') %}
 						<td><input type="checkbox" class="custom-control-input" id="idMon_{{ row[column] }}"></td>
 					{% else %}
-						{% if (column == 'Status') %}
-							{% if (row[column] == 'OK') %}
-								<td style="text-align:center"><img src="{{ url_for('static', filename='green-tick_2.png') }}" alt="OK" style="width:28px;height:28px;"></td>
-							{% else %}
-								<td style="text-align:center"><img src="{{ url_for('static', filename='Sign-Close-icon.png') }}" alt="Não OK" style="width:28px;height:28px;"></td>
-							{% endif %}
-						{% else %}
-							<td>{{ row[column] }}</td>
-						{% endif %}
+						<td>{{ row[column] }}</td>
 					{% endif %}
 				{%- endfor %}
 				</tr>

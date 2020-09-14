@@ -61,3 +61,9 @@ def configmonitor():
             monitor_form.percentual.data = monitoramento.flg_percentual
             monitor_form.ativo.data = monitoramento.flg_ativo
     return render_template('configMonitoramento.html', title='Configurar Monitoramento', form=monitor_form)
+
+@bp.route('/traderexpert/todosmonitores', methods=['GET'])
+def todosmonitores():
+    form = MonitoramentoForm()
+    cols, rs = Monitoramento.todosMonitoramentos()
+    return render_template('monitores.html', title='Monitoramentos', form=form, columns=cols, items=rs)

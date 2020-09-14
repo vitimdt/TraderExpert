@@ -145,6 +145,37 @@ class Monitoramento(db.Model):
         return Monitoramento.query.filter_by(id=id_monitoramento).first()
 
     @classmethod
+    def todosMonitoramentos(cls):
+        qry = text("SELECT m.id, a.codigo, a.nome, m.valor_ref, m.operador, m.valor_meta_dif, m.sugestao, "
+                   "m.flg_percentual, m.flg_ativo FROM monitoramento m, acao a "
+                   "WHERE m.acao_id = a.id")
+        columns = ['ID', 'Código', 'Nome', 'Valor Referência', 'Operador', 'Valor Diferença', "Sugestão",
+                   "Percentual?", "Ativo?"]
+        monitores = db.engine.execute(qry).fetchall()
+        resultSet = []
+        for lin in monitores:
+            perc = 'SIM'
+            ativo = 'SIM'
+            if lin[7] == 'N':
+                perc = 'Não'
+            else:
+                perc = 'Sim'
+            if lin[8] == 'N':
+                ativo = 'Não'
+            else:
+                ativo = 'Sim'
+            resultSet.append({columns[0]: lin[0],
+                              columns[1]: lin[1],
+                              columns[2]: lin[2],
+                              columns[3]: str(lin[3]).replace('.', ','),
+                              columns[4]: lin[4],
+                              columns[5]: str(lin[5]).replace('.', ','),
+                              columns[6]: lin[6],
+                              columns[7]: perc,
+                              columns[8]: ativo})
+        return columns, resultSet
+
+    @classmethod
     def buscaMonitoramentos(cls):
         qry = text("SELECT m.id, a.codigo, a.nome, ct.valor, m.valor_ref, m.operador, m.valor_meta_dif, "
                    "m.sugestao, ct.data_atualizacao, ct.hora_pregao FROM cotacao_temporeal ct, "
