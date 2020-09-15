@@ -65,12 +65,12 @@ class CotacaoTempoReal(db.Model):
     def buscaCotacaoTR(cls):
         qry = text("SELECT tab.codigo, tab.nome, tab.valor, tab.quantidade, tab.valor_cotacao, tab.DIF, "
                    "tab.Valor_Total_Invest, tab.Valor_Total_Bolsa, tab.Percentual, tab.data_atualizacao, "
-                   "tab.hora_pregao FROM (SELECT ct.id, a.codigo, a.nome, c.valor, c.quantidade, "
+                   "tab.hora_pregao, tab.valor_taxas FROM (SELECT ct.id, a.codigo, a.nome, c.valor, c.quantidade, "
                    "ct.valor as Valor_Cotacao, ct.data_atualizacao, ct.hora_pregao, "
                    "round(ct.valor - c.valor,2) as DIF, round(c.valor*c.quantidade,2) as Valor_Total_Invest, "
                    "round(ct.valor*c.quantidade,2) as Valor_Total_Bolsa, "
                    "CONCAT(round((((ct.valor*c.quantidade) - (c.valor*c.quantidade)) * 100) / "
-                   "(c.valor*c.quantidade),2), ' %') as Percentual "
+                   "(c.valor*c.quantidade),2), ' %') as Percentual, c.valor_taxas "
                    "FROM cotacao_temporeal ct, acao a, carteira c "
                    "WHERE ct.acao_id = a.id and c.acao_id = a.id and ct.data_atualizacao = "
                    "(select max(aux.data_atualizacao) from cotacao_temporeal aux where aux.acao_id = a.id) "
@@ -82,7 +82,7 @@ class CotacaoTempoReal(db.Model):
         totInvest = 0
         totCotacao = 0
         for lin in cotacoesTR:
-            totInvest += lin[6]
+            totInvest += lin[6] + lin[11]
             totCotacao += lin[7]
             resultSet.append({columns[0]: lin[0],
                               columns[1]: lin[1],
@@ -122,6 +122,27 @@ class Carteira(db.Model):
 
     def find_all(self):
         return Carteira.query.all()
+
+    @classmethod
+    def retornarCarteira(cls):
+        qry = text("SELECT c.id, a.codigo, a.nome, c.valor, c.quantidade, c.valor_taxas, "
+                   "c.valor_total, c.data_compra FROM carteira c, acao a "
+                   "WHERE c.acao_id = a.id")
+        columns = ['ID', 'Código', 'Nome', 'Valor Compra', 'Quantidade', 'Valor Taxas', "Total",
+                   "Data Compra", "Excluir"]
+        carteira = db.engine.execute(qry).fetchall()
+        resultSet = []
+        for lin in carteira:
+            resultSet.append({columns[0]: lin[0],
+                              columns[1]: lin[1],
+                              columns[2]: lin[2],
+                              columns[3]: str(lin[3]).replace('.', ','),
+                              columns[4]: lin[4],
+                              columns[5]: str(lin[5]).replace('.', ','),
+                              columns[6]: str(lin[6]).replace('.', ','),
+                              columns[7]: lin[7].strftime("%d/%m/%Y"),
+                              columns[8]: lin[0]})
+        return columns, resultSet
 
 class Monitoramento(db.Model):
     __tablename__ = 'monitoramento'

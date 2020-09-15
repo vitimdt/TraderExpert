@@ -1,9 +1,10 @@
 from flask import render_template, request, url_for, redirect, flash
 from app import db
 from app.main import bp
-from app.entities.Entities import CotacaoTempoReal, Monitoramento
+from app.entities.Entities import CotacaoTempoReal, Monitoramento, Carteira
 from app.main.forms.configMonitorForm import ConfigMonitorForm
 from app.main.forms.monitoramentoForm import MonitoramentoForm
+from app.main.forms.carteiraForm import CarteiraForm
 
 @bp.route('/traderexpert/', methods=['GET'])
 @bp.route('/traderexpert/index', methods=['GET'])
@@ -67,3 +68,18 @@ def todosmonitores():
     form = MonitoramentoForm()
     cols, rs = Monitoramento.todosMonitoramentos()
     return render_template('monitores.html', title='Monitoramentos', form=form, columns=cols, items=rs)
+
+@bp.route('/traderexpert/minhacarteira', methods=['GET'])
+def minhacarteira():
+    form = CarteiraForm()
+    cols, rs = Carteira.retornarCarteira()
+    return render_template('carteira.html', title='Minha Carteira', form=form, columns=cols, items=rs)
+
+@bp.route('/traderexpert/removeracao/<id>', methods=['GET'])
+def removeracao(id):
+    itemCarteira = Carteira.query.filter_by(id=id).first_or_404()
+    db.session.delete(itemCarteira)
+    db.session.commit()
+    form = CarteiraForm()
+    cols, rs = Carteira.retornarCarteira()
+    return render_template('carteira.html', title='Minha Carteira', form=form, columns=cols, items=rs)

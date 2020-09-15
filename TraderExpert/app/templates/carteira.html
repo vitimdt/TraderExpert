@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block scripts %}
+  <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+  <script>
+	$(":checkbox").on("click", function(){
+		if ( $(this).prop('checked') ){
+			idSel = $(this).prop('id');
+			$("#carteiraSel").prop('value', idSel);
+			$.each($("input[type='checkbox']"), function(id , val){
+				if ($(val).prop('id') != idSel){
+					$(val).prop('checked', false);
+				}
+			});
+		}
+	});
+  </script>
+{% endblock %}
+
+{% block app_content %}
+<h2><b>Minha Carteira</b></h2>
+	<form action="" method="GET">
+		<table class="table table-striped" id="users">
+			 <thead>
+			  {%- for column in columns %}
+				{% if (column in ('ID','Excluir')) %}
+				 <th></th>
+				{% else %}
+				 <th>{{ column }}</th>
+				{% endif %}
+			  {%- endfor %}
+			 </thead>
+
+			 <tbody>
+			 {%- for row in items %}
+				<tr>
+				{%- for column in columns %}
+					{% if (column == 'ID') %}
+						<td><input type="checkbox" class="custom-control-input" id="idCart_{{ row[column] }}"></td>
+					{% else %}
+						{% if (column == 'Excluir') %}
+							<td><a href="{{ url_for('main.removeracao', id=row[column]) }}">Excluir</a></td>
+						{% else %}
+							<td>{{ row[column] }}</td>
+						{% endif %}
+					{% endif %}
+				{%- endfor %}
+				</tr>
+			 {%- endfor %}
+			 </tbody>
+		</table>
+		{{ form.carteiraSel() }}
+		<p>{{ form.submit() }}</p>
+	</form>
+{% endblock %}
