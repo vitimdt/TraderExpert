@@ -10,7 +10,6 @@ class Acao(Base):
     id = Column(Integer, primary_key=True)
     codigo = Column(String(8))
     nome = Column(String(70))
-    nome_api = Column(String(255))
 
     cotacoes = relationship('CotacaoTempoReal', backref="acoes")
 
@@ -41,6 +40,22 @@ class Configuracao(Base):
     @classmethod
     def find_by_key(cls, session, chave):
         return session.query(cls).filter_by(chave=chave).first()
+
+class AcessoAPI(Base):
+    __tablename__ = 'acessoapi'
+    id = Column(Integer, primary_key=True)
+    api_id = Column(Integer, ForeignKey('configuracao.id'))
+    acao_id = Column(Integer, ForeignKey('acao.id'))
+    nome_api = Column(String(255))
+    api = relationship('Configuracao')
+    acao = relationship('Acao')
+
+    def __repr__(self):
+        return f'AcessoAPI {self.api_id} - {self.nome_api}'
+
+    @classmethod
+    def find_by_api_acao(cls, session, api_id, acao_id):
+        return session.query(cls).filter_by(api_id=api_id, acao_id=acao_id).first()
 
 class CotacaoTempoReal(Base):
     __tablename__ = 'cotacao_temporeal'

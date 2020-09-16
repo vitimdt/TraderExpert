@@ -7,7 +7,6 @@ class Acao(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     codigo = db.Column(db.String(8))
     nome = db.Column(db.String(70))
-    nome_api = db.Column(db.String(255))
 
     cotacoes = db.relationship('CotacaoTempoReal', backref="acoes")
 
