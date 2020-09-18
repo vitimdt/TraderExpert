@@ -3,6 +3,7 @@
 
 {% block scripts %}
   <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
   <script>
 	$(":checkbox").on("click", function(){
 		if ( $(this).prop('checked') ){
@@ -15,12 +16,29 @@
 			});
 		}
 	});
+
+	function confirmDelete(id){
+		var ok = confirm("Deseja realmente excluir a ação da sua carteira?");
+		if (ok == true) {
+			$.ajax({
+				url: '/traderexpert/removeracao/' + id,
+				success: function(response){
+					console.log(response);
+				},
+				error: function(error){
+					console.log(error);
+				}
+			});
+		}
+    }
+
   </script>
+
 {% endblock %}
 
 {% block app_content %}
 <h2><b>Minha Carteira</b></h2>
-	<form action="" method="GET">
+
 		<table class="table table-striped" id="users">
 			 <thead>
 			  {%- for column in columns %}
@@ -40,7 +58,9 @@
 						<td><input type="checkbox" class="custom-control-input" id="idCart_{{ row[column] }}"></td>
 					{% else %}
 						{% if (column == 'Excluir') %}
-							<td><a href="{{ url_for('main.removeracao', id=row[column]) }}">Excluir</a></td>
+							<td>
+								<a id="btnDelete" name="btnDelete" onclick="confirmDelete({{ row[column] }})" class="btn btn-danger">Excluir</a>
+							</td>
 						{% else %}
 							<td>{{ row[column] }}</td>
 						{% endif %}
@@ -50,6 +70,7 @@
 			 {%- endfor %}
 			 </tbody>
 		</table>
+	<form action="" method="GET">
 		{{ form.carteiraSel() }}
 		<p>{{ form.submit() }}</p>
 	</form>

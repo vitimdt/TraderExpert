@@ -20,7 +20,7 @@
 
 {% block app_content %}
 <h2><b>Monitoramento de Ações</b></h2>
-	<a href="{{ url_for('main.todosmonitores') }}">Visualizar todos monitoramentos</a><br><br>
+	<a href="{{ url_for('main.todosmonitores') }}" class="btn btn-default pull-right">Visualizar todos monitoramentos</a><br><br>
 	<form action="{{ url_for('main.configmonitor') }}" method="GET">
 		<table class="table table-striped" id="users">
 			 <thead>
