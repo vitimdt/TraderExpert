@@ -8,7 +8,16 @@
 	<script>
 		$(function() {
 			setInterval(function() {
-				window.location.reload();
+				$.ajax({
+					url: '/traderexpert/cotacoestr',
+					type: 'GET',
+					success: function(response){
+						$("#resumoCotacoesTR").html(response);
+					},
+					error: function(xhr){
+						alert('Request failed :' + xhr.responseText);
+					}
+				});
 			}, 60000);
 		})
 	</script>
@@ -16,46 +25,7 @@
 
 {% block app_content %}
 <h2><b>Carteira - Próximo do Tempo Real</b></h2>
-	<table class="table table-striped" id="users">
-		 <thead>
-		  {%- for column in columns %}
-			 <th>{{ column }}</th>
-		  {%- endfor %}
-		 </thead>
-
-		 <tbody>
-		 {%- for row in items %}
-			<tr>
-			{%- for column in columns %}
-				{% if (column in ("Diferença", "Percentual")) %}
-					{% if (row[column].find("-") == -1) %}
-						<td style="font-weight:bold; color: blue;" >{{ row[column] }}</td>
-					{% else %}
-						<td style="font-weight:bold; color: red;">{{ row[column] }}</td>
-					{% endif %}
-				{% else %}
-					<td>{{ row[column] }}</td>
-				{% endif %}
-			{%- endfor %}
-			</tr>
-		 {%- endfor %}
-		 </tbody>
- 	</table>
-	<div class="container">
-		<h3><b>Total Carteira</b></h3>
-		<label>Investimento (com Taxas) (R$):&nbsp;</label><span>{{ tot_invest }}</span><br>
-		<label>Total Cotação (R$):&nbsp;</label><span>{{ tot_cotacao }}</span><br>
-		<label>Lucro / Prejuízo (R$):&nbsp;</label>
-		{% if (dif_total.find("-") == -1) %}
-			<span style="color: blue;">{{ dif_total }}</span>
-		{% else %}
-			<span style="color: red;">{{ dif_total }}</span>
-		{% endif %}<br>
-		<label>Diferença:&nbsp;</label>
-		{% if (dif_percentual.find("-") == -1) %}
-			<span style="color: blue;">{{ dif_percentual }} %</span>
-		{% else %}
-			<span style="color: red;">{{ dif_percentual }} %</span>
-		{% endif %}
+	<div id="resumoCotacoesTR">
+		{% include '_cotacoesTempoReal.html' %}
 	</div>
 {% endblock %}

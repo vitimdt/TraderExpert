@@ -44,6 +44,6 @@
             {{ form.ativo(size=1) }}<br>
         </p>
 
-        <p>{{ form.submit() }}</p>
+        <p>{{ wtf.form_field(form.submit, class="btn btn-default pull-left") }}</p>
     </form>
 {% endblock %}

@@ -21,13 +21,15 @@
 		var ok = confirm("Deseja realmente excluir a ação da sua carteira?");
 		if (ok == true) {
 			$.ajax({
-				url: '/traderexpert/removeracao/' + id,
-				success: function(response){
-					console.log(response);
-				},
-				error: function(error){
-					console.log(error);
-				}
+					url: '/traderexpert/removeracao',
+					type: 'GET',
+					data: {acaoid: id},
+					success: function(response){
+						$("#acoes_carteira").html(response);
+					},
+					error: function(xhr){
+						alert('Request failed :' + xhr.responseText);
+					}
 			});
 		}
     }
@@ -39,39 +41,11 @@
 {% block app_content %}
 <h2><b>Minha Carteira</b></h2>
 
-		<table class="table table-striped" id="users">
-			 <thead>
-			  {%- for column in columns %}
-				{% if (column in ('ID','Excluir')) %}
-				 <th></th>
-				{% else %}
-				 <th>{{ column }}</th>
-				{% endif %}
-			  {%- endfor %}
-			 </thead>
-
-			 <tbody>
-			 {%- for row in items %}
-				<tr>
-				{%- for column in columns %}
-					{% if (column == 'ID') %}
-						<td><input type="checkbox" class="custom-control-input" id="idCart_{{ row[column] }}"></td>
-					{% else %}
-						{% if (column == 'Excluir') %}
-							<td>
-								<a id="btnDelete" name="btnDelete" onclick="confirmDelete({{ row[column] }})" class="btn btn-danger">Excluir</a>
-							</td>
-						{% else %}
-							<td>{{ row[column] }}</td>
-						{% endif %}
-					{% endif %}
-				{%- endfor %}
-				</tr>
-			 {%- endfor %}
-			 </tbody>
-		</table>
+	<div id="acoes_carteira">
+		{% include '_acoesCarteira.html' %}
+	</div>
 	<form action="" method="GET">
 		{{ form.carteiraSel() }}
-		<p>{{ form.submit() }}</p>
+		<p>{{ wtf.form_field(form.submit, class="btn btn-default pull-right") }}</p>
 	</form>
 {% endblock %}

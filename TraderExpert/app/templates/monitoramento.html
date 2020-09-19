@@ -56,6 +56,6 @@
 			 </tbody>
 		</table>
 		{{ form.monitorSel() }}
-		<p>{{ form.submit() }}</p>
+		<p>{{ wtf.form_field(form.submit, class="btn btn-default pull-right") }}</p>
 	</form>
 {% endblock %}

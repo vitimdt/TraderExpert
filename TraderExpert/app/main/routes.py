@@ -14,6 +14,13 @@ def index():
                            tot_invest=tot[0], tot_cotacao=tot[1], dif_total=tot[2],
                            dif_percentual=tot[3])
 
+@bp.route('/traderexpert/cotacoestr', methods=['GET'])
+def cotacoestr():
+    cols, rs, tot = CotacaoTempoReal.buscaCotacaoTR()
+    return render_template('_cotacoesTempoReal.html', columns=cols, items=rs,
+                           tot_invest=tot[0], tot_cotacao=tot[1], dif_total=tot[2],
+                           dif_percentual=tot[3])
+
 @bp.route('/traderexpert/monitor', methods=['GET'])
 def monitor():
     form = MonitoramentoForm()
@@ -75,11 +82,12 @@ def minhacarteira():
     cols, rs = Carteira.retornarCarteira()
     return render_template('carteira.html', title='Minha Carteira', form=form, columns=cols, items=rs)
 
-@bp.route('/traderexpert/removeracao/<id>', methods=['GET'])
-def removeracao(id):
-    itemCarteira = Carteira.query.filter_by(id=id).first_or_404()
+@bp.route('/traderexpert/removeracao', methods=['GET'])
+def removeracao():
+    id_acao = request.args.get('acaoid')
+    itemCarteira = Carteira.query.filter_by(id=id_acao).first_or_404()
     db.session.delete(itemCarteira)
     db.session.commit()
     form = CarteiraForm()
     cols, rs = Carteira.retornarCarteira()
-    return render_template('carteira.html', title='Minha Carteira', form=form, columns=cols, items=rs)
+    return render_template('_acoesCarteira.html', form=form, columns=cols, items=rs)
