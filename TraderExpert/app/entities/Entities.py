@@ -122,6 +122,9 @@ class Carteira(db.Model):
     def find_all(self):
         return Carteira.query.all()
 
+    def find_by_id(self, id_carteira):
+        return Carteira.query.filter_by(id=id_carteira).first()
+
     @classmethod
     def retornarCarteira(cls):
         qry = text("SELECT c.id, a.codigo, a.nome, c.valor, c.quantidade, c.valor_taxas, "

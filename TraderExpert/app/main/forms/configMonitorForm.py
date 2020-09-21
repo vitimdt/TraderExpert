@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SubmitField
 from wtforms.validators import DataRequired, Regexp
-from app.entities.Entities import Acao, Monitoramento
+from app.entities.Entities import Acao
 
 
 class ConfigMonitorForm(FlaskForm):

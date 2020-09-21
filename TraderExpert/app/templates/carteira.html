@@ -44,7 +44,7 @@
 	<div id="acoes_carteira">
 		{% include '_acoesCarteira.html' %}
 	</div>
-	<form action="" method="GET">
+	<form action="{{ url_for('main.mantercarteira') }}" method="GET">
 		{{ form.carteiraSel() }}
 		<p>{{ wtf.form_field(form.submit, class="btn btn-default pull-right") }}</p>
 	</form>

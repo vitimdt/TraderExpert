@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <h2><b>Manter Ações da Carteira</b></h2>
+    <form action="" method="POST">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.acao.label }}<br>
+            {{ form.acao(size=1) }}<br>
+        </p>
+        <p>
+            {{ form.email.label }}<br>
+            {{ form.email(size=70) }}<br>
+            {% for error in form.email.errors %}
+                {% if (error != 'This field is required.') %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endif %}
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.valor_compra.label }}<br>
+            {{ form.valor_compra(size=20) }}<br>
+            {% for error in form.valor_compra.errors %}
+                {% if (error != 'This field is required.') %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endif %}
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.quantidade.label }}<br>
+            {{ form.quantidade(size=20) }}<br>
+            {% for error in form.quantidade.errors %}
+                {% if (error != 'This field is required.') %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endif %}
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.valor_taxas.label }}<br>
+            {{ form.valor_taxas(size=20) }}<br>
+            {% for error in form.valor_taxas.errors %}
+                {% if (error != 'This field is required.') %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endif %}
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.data_compra.label }}<br>
+            {{ form.data_compra(size=20) }}<br>
+            {% for error in form.data_compra.errors %}
+                {% if (error != 'This field is required.') %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endif %}
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.valor_total.label }}<br>
+            {{ form.valor_total(size=20) }}<br>
+            {% for error in form.valor_total.errors %}
+                {% if (error != 'This field is required.') %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endif %}
+            {% endfor %}
+        </p>
+
+        <p>{{ wtf.form_field(form.submit, class="btn btn-default pull-left") }}</p>
+    </form>
+{% endblock %}
