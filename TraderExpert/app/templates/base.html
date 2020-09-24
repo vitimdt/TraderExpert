@@ -3,6 +3,34 @@
     {% if title %}{{ title }} - Trader Expert{% else %}Bem vindo ao Trader Expert{% endif %}
 {% endblock %}
 
+{% block scripts %}
+    {{ super() }}
+    {{ moment.include_moment() }}
+    {{ moment.lang(g.locale) }}
+    <script>
+        function set_count_acoes(n) {
+            $('#count_acoes').text(n);
+            $('#count_acoes').css('visibility', n != '0' ? 'visible' : 'hidden');
+        }
+
+        $(function() {
+            setInterval(function() {
+                $.ajax('{{ url_for('main.notifications') }}').done(
+                    function(notifications) {
+                        for (var i = 0; i < notifications.length; i++) {
+                            switch (notifications[i].name) {
+                                case 'acoes_sugeridas':
+                                    set_count_acoes(notifications[i].data);
+                                    break;
+                            }
+                        }
+                    }
+                );
+            }, 60000);
+        })
+    </script>
+{% endblock %}
+
 {% block navbar %}
     <nav class="navbar navbar-default">
         <div class="container">
@@ -18,7 +46,12 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     <li><a href="{{ url_for('main.index') }}">Home</a></li>
-                    <li><a href="{{ url_for('main.monitor') }}">Monitoramento</a></li>
+                    <li>
+                    <a href="{{ url_for('main.monitor') }}">Monitoramento
+                            <span id="count_acoes" class="badge" style="visibility: hidden;">
+                            </span></a>
+                    </li>
+                    <!--<li><a href="{{ url_for('main.monitor') }}">Monitoramento</a></li>-->
                     <li><a href="{{ url_for('main.minhacarteira') }}">Minha Carteira</a></li>
                 </ul>
 

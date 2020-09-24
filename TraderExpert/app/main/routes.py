@@ -1,4 +1,4 @@
-from flask import render_template, request, url_for, redirect, flash
+from flask import render_template, request, url_for, redirect, flash, jsonify
 from app import db
 from app.main import bp
 from app.entities.Entities import CotacaoTempoReal, Monitoramento, Carteira
@@ -142,3 +142,16 @@ def removeracao():
     form = CarteiraForm()
     cols, rs = Carteira.retornarCarteira()
     return render_template('_acoesCarteira.html', form=form, columns=cols, items=rs)
+
+@bp.route('/traderexpert/notifications')
+def notifications():
+    # Buscar ações sugeridas OK
+    cols, rs = Monitoramento.buscaMonitoramentos()
+    count = 0
+    for row in rs:
+        if row['Status'] == 'OK':
+            count += 1
+    return jsonify([{
+        'name': 'acoes_sugeridas',
+        'data': str(count)
+    }])
