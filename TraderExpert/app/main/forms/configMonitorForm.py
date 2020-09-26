@@ -8,7 +8,7 @@ class ConfigMonitorForm(FlaskForm):
     acao = SelectField('Ação', validators=[DataRequired()])
     valor_ref = StringField('Valor de Referência', validators=[DataRequired(), Regexp(r'^[0-9]+(\,[0-9]{1,2})?$')])
     operador = SelectField('Operador', choices=[('-', '-'), ('+', '+')], validators=[DataRequired()])
-    valor_dif = StringField('Valor de Referência', validators=[DataRequired(), Regexp(r'^[0-9]+(\,[0-9]{1,2})?$')])
+    valor_dif = StringField('Valor de Diferença', validators=[DataRequired(), Regexp(r'^[0-9]+(\,[0-9]{1,2})?$')])
     sugestao = SelectField('Sugestao', choices=[('COMPRA', 'COMPRAR'), ('VENDA', 'VENDER')], validators=[DataRequired()])
     percentual = SelectField('Percentual', choices=[('N', 'Não'), ('S', 'Sim')], validators=[DataRequired()])
     ativo = SelectField('Ativo', choices=[('N', 'Não'), ('S', 'Sim')], validators=[DataRequired()])

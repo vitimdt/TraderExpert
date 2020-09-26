@@ -13,8 +13,7 @@
             $('#count_acoes').css('visibility', n != '0' ? 'visible' : 'hidden');
         }
 
-        $(function() {
-            setInterval(function() {
+        function verificarNotificacoes() {
                 $.ajax('{{ url_for('main.notifications') }}').done(
                     function(notifications) {
                         for (var i = 0; i < notifications.length; i++) {
@@ -26,8 +25,14 @@
                         }
                     }
                 );
-            }, 60000);
+        }
+
+        $(function() {
+            setInterval(function (){ verificarNotificacoes(); } , 60000);
         })
+
+        verificarNotificacoes();
+
     </script>
 {% endblock %}
 
