@@ -14,17 +14,17 @@
         }
 
         function verificarNotificacoes() {
-                $.ajax('{{ url_for('main.notifications') }}').done(
-                    function(notifications) {
-                        for (var i = 0; i < notifications.length; i++) {
-                            switch (notifications[i].name) {
-                                case 'acoes_sugeridas':
-                                    set_count_acoes(notifications[i].data);
-                                    break;
-                            }
+            $.ajax('{{ url_for('main.notifications') }}').done(
+                function(notifications) {
+                    for (var i = 0; i < notifications.length; i++) {
+                        switch (notifications[i].name) {
+                            case 'acoes_sugeridas':
+                                set_count_acoes(notifications[i].data);
+                                break;
                         }
                     }
-                );
+                }
+            );
         }
 
         $(function() {
@@ -32,7 +32,6 @@
         })
 
         verificarNotificacoes();
-
     </script>
 {% endblock %}
 

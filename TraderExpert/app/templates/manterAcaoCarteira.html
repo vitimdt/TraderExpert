@@ -1,6 +1,42 @@
 {% extends "base.html" %}
 {% import 'bootstrap/wtf.html' as wtf %}
 
+{% block scripts %}
+  <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+  <script>
+
+    function cacularValorTotal(){
+        $("#valor_total").prop('value', '');
+        $("#submit").prop('disabled', true);
+        if ($("#valor_compra").prop('value') != '' &&
+	        $("#quantidade").prop('value') != '' &&
+	        $("#valor_taxas").prop('value') != ''){
+            compra = parseFloat($("#valor_compra").prop('value').replace(',', '.'));
+            quantidade = parseFloat($("#quantidade").prop('value').replace(',', '.'));
+            taxas = parseFloat($("#valor_taxas").prop('value').replace(',', '.'));
+            if (!isNaN(compra) && !isNaN(quantidade) && !isNaN(taxas)){
+                total = (compra * quantidade) + taxas;
+                $("#valor_total").prop('value', total.toString().replace('.', ','));
+                $("#submit").prop('disabled', false);
+            }
+	    }
+    }
+
+	$("#valor_compra").on("blur", function(){
+	    cacularValorTotal();
+	});
+
+	$("#quantidade").on("blur", function(){
+	    cacularValorTotal();
+	});
+
+	$("#valor_taxas").on("blur", function(){
+	    cacularValorTotal();
+	});
+
+  </script>
+{% endblock %}
+
 {% block app_content %}
     <h2><b>Manter Ações da Carteira</b></h2>
     <form action="" method="POST">
@@ -11,12 +47,7 @@
         </p>
         <p>
             {{ form.email.label }}<br>
-            {{ form.email(size=70) }}<br>
-            {% for error in form.email.errors %}
-                {% if (error != 'This field is required.') %}
-                    <span style="color: red;">[{{ error }}]</span>
-                {% endif %}
-            {% endfor %}
+            {{ form.email(size=50, readonly=true) }}<br>
         </p>
         <p>
             {{ form.valor_compra.label }}<br>
@@ -56,7 +87,7 @@
         </p>
         <p>
             {{ form.valor_total.label }}<br>
-            {{ form.valor_total(size=20) }}<br>
+            {{ form.valor_total(size=20, readonly=true) }}<br>
             {% for error in form.valor_total.errors %}
                 {% if (error != 'This field is required.') %}
                     <span style="color: red;">[{{ error }}]</span>
@@ -64,6 +95,6 @@
             {% endfor %}
         </p>
 
-        <p>{{ wtf.form_field(form.submit, class="btn btn-default pull-left") }}</p>
+        <p>{{ wtf.form_field(form.submit, disabled=true, class="btn btn-default pull-left") }}</p>
     </form>
 {% endblock %}
