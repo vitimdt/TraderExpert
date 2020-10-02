@@ -129,7 +129,7 @@ class Carteira(db.Model):
     def retornarCarteira(cls):
         qry = text("SELECT c.id, a.codigo, a.nome, c.valor, c.quantidade, c.valor_taxas, "
                    "c.valor_total, c.data_compra FROM carteira c, acao a "
-                   "WHERE c.acao_id = a.id")
+                   "WHERE c.acao_id = a.id ORDER BY a.codigo")
         columns = ['ID', 'Código', 'Nome', 'Valor Compra', 'Quantidade', 'Valor Taxas', "Total",
                    "Data Compra", "Excluir"]
         carteira = db.engine.execute(qry).fetchall()
@@ -171,7 +171,7 @@ class Monitoramento(db.Model):
     def todosMonitoramentos(cls):
         qry = text("SELECT m.id, a.codigo, a.nome, m.valor_ref, m.operador, m.valor_meta_dif, m.sugestao, "
                    "m.flg_percentual, m.flg_ativo FROM monitoramento m, acao a "
-                   "WHERE m.acao_id = a.id")
+                   "WHERE m.acao_id = a.id ORDER BY a.codigo")
         columns = ['ID', 'Código', 'Nome', 'Valor Referência', 'Operador', 'Valor Diferença', "Sugestão",
                    "Percentual?", "Ativo?"]
         monitores = db.engine.execute(qry).fetchall()
@@ -204,7 +204,8 @@ class Monitoramento(db.Model):
                    "m.sugestao, ct.data_atualizacao, ct.hora_pregao FROM cotacao_temporeal ct, "
                    "acao a, monitoramento m WHERE ct.acao_id = a.id AND m.acao_id = a.id AND "
                    "ct.data_atualizacao = (SELECT MAX(aux.data_atualizacao) "
-                   "FROM cotacao_temporeal aux WHERE aux.acao_id = a.id) AND m.flg_ativo = 'S'")
+                   "FROM cotacao_temporeal aux WHERE aux.acao_id = a.id) AND m.flg_ativo = 'S' "
+                   "ORDER BY a.codigo")
         columns = ['ID', 'Código', 'Nome', 'Valor Cotação', 'Valor Alvo', 'Hora Atualização', "Hora Cotação", "Sugestão", "Status"]
         monitores = db.engine.execute(qry).fetchall()
         resultSet = []

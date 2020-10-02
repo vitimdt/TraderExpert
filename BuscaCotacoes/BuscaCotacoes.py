@@ -45,8 +45,8 @@ class BuscaCotacoes:
             if acesso_api is not None:
                 url = config.valor.format(acesso_api.nome_api)
                 response = self.http.request('GET', url, preload_content=False, headers=headers)
-                hora_pregao = self.extrairHoraAtualizacao(response.data.decode('utf-8'))
                 try:
+					hora_pregao = self.extrairHoraAtualizacao(response.data.decode('utf-8'))
                     valor = self.extrairValorCotacao(response.data.decode('utf-8'))
                     cotacao = CotacaoTempoReal(acao_id=op.acao.id,
                                                valor=float(valor.replace(',', '.')),
@@ -70,8 +70,8 @@ class BuscaCotacoes:
             if acesso_api is not None:
                 url = config.valor.format(acesso_api.nome_api)
                 response = self.http.request('GET', url, preload_content=False, headers=headers)
-                hora_pregao = self.extrairHoraAtualizacao(response.data.decode('utf-8'))
                 try:
+					hora_pregao = self.extrairHoraAtualizacao(response.data.decode('utf-8'))
                     valor = self.extrairValorCotacao(response.data.decode('utf-8'))
                     cotacao = CotacaoTempoReal(acao_id=monitor.acao_id,
                                                valor=float(valor.replace(',', '.')),
