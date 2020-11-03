@@ -27,7 +27,7 @@ class BuscaCotacoes:
     def iniciarColetaCotacoes(self):
         data_hora = self.dateTimeNow()
         CotacaoTempoReal.clear_table(conn=self.dbConn.conn, dataAtual=data_hora)
-        while 10 <= data_hora.hour <= 17:
+        while 10 <= data_hora.hour <= 18:
             self.coletar_cotacoes()
             self.coletar_cotacoes_monitoramento()
             print("[" + time.ctime() + "] Cotações coletadas com sucesso!")
@@ -46,7 +46,7 @@ class BuscaCotacoes:
                 url = config.valor.format(acesso_api.nome_api)
                 response = self.http.request('GET', url, preload_content=False, headers=headers)
                 try:
-					hora_pregao = self.extrairHoraAtualizacao(response.data.decode('utf-8'))
+                    hora_pregao = self.extrairHoraAtualizacao(response.data.decode('utf-8'))
                     valor = self.extrairValorCotacao(response.data.decode('utf-8'))
                     cotacao = CotacaoTempoReal(acao_id=op.acao.id,
                                                valor=float(valor.replace(',', '.')),
@@ -71,7 +71,7 @@ class BuscaCotacoes:
                 url = config.valor.format(acesso_api.nome_api)
                 response = self.http.request('GET', url, preload_content=False, headers=headers)
                 try:
-					hora_pregao = self.extrairHoraAtualizacao(response.data.decode('utf-8'))
+                    hora_pregao = self.extrairHoraAtualizacao(response.data.decode('utf-8'))
                     valor = self.extrairValorCotacao(response.data.decode('utf-8'))
                     cotacao = CotacaoTempoReal(acao_id=monitor.acao_id,
                                                valor=float(valor.replace(',', '.')),
