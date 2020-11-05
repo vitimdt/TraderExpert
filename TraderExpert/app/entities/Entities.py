@@ -173,7 +173,7 @@ class Monitoramento(db.Model):
                    "m.flg_percentual, m.flg_ativo FROM monitoramento m, acao a "
                    "WHERE m.acao_id = a.id ORDER BY a.codigo")
         columns = ['ID', 'Código', 'Nome', 'Valor Referência', 'Operador', 'Valor Diferença', "Sugestão",
-                   "Percentual?", "Ativo?"]
+                   "Percentual?", "Ativo?", "Excluir"]
         monitores = db.engine.execute(qry).fetchall()
         resultSet = []
         for lin in monitores:
@@ -195,7 +195,8 @@ class Monitoramento(db.Model):
                               columns[5]: str(lin[5]).replace('.', ','),
                               columns[6]: lin[6],
                               columns[7]: perc,
-                              columns[8]: ativo})
+                              columns[8]: ativo,
+                              columns[9]: lin[0]})
         return columns, resultSet
 
     @classmethod

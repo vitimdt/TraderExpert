@@ -82,6 +82,15 @@ def todosmonitores():
     cols, rs = Monitoramento.todosMonitoramentos()
     return render_template('monitores.html', title='Monitoramentos', form=form, columns=cols, items=rs)
 
+@bp.route('/traderexpert/removermonitor', methods=['GET'])
+def removermonitor():
+    id_monitor = request.args.get('monitorid')
+    itemMonitor = Monitoramento.query.filter_by(id=id_monitor).first_or_404()
+    db.session.delete(itemMonitor)
+    db.session.commit()
+    form = MonitoramentoForm()
+    cols, rs = Monitoramento.todosMonitoramentos()
+    return render_template('_monitores.html', form=form, columns=cols, items=rs)
 
 @bp.route('/traderexpert/minhacarteira', methods=['GET'])
 def minhacarteira():
