@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block scripts %}
+  <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+  <script>
+	$(":checkbox").on("click", function(){
+		if ( $(this).prop('checked') ){
+			idSel = $(this).prop('id');
+			$("#monitorSel").prop('value', idSel);
+			$.each($("input[type='checkbox']"), function(id , val){
+				if ($(val).prop('id') != idSel){
+					$(val).prop('checked', false);
+				}
+			});
+		}
+	});
+
+	function confirmDelete(id){
+		var ok = confirm("Deseja realmente excluir o monitoramento?");
+		if (ok == true) {
+			$.ajax({
+					url: '/traderexpert/removermonitor',
+					type: 'GET',
+					data: {monitorid: id},
+					success: function(response){
+						$("#area_monitores").html(response);
+					},
+					error: function(xhr){
+						alert('Request failed :' + xhr.responseText);
+					}
+			});
+		}
+    }
+  </script>
+{% endblock %}
+
+{% block app_content %}
+<h2><b>Todos Monitoramentos</b></h2>
+	<div id="area_monitores">
+		{% include '_monitores.html' %}
+	</div>
+	<form action="{{ url_for('main.configmonitor') }}" method="GET">
+		{{ form.monitorSel() }}
+		<p>{{ wtf.form_field(form.submit, class="btn btn-default pull-right") }}</p>
+	</form>
+{% endblock %}

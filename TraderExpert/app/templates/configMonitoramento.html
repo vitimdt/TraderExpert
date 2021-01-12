@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <h2><b>Configurar Monitoramento</b></h2>
+    <form action="" method="POST">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.acao.label }}<br>
+            {{ form.acao(size=1) }}<br>
+        </p>
+        <p>
+            {{ form.valor_ref.label }}<br>
+            {{ form.valor_ref(size=20) }}<br>
+            {% for error in form.valor_ref.errors %}
+                {% if (error != 'This field is required.') %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endif %}
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.operador.label }}<br>
+            {{ form.operador(size=1) }}<br>
+        </p>
+        <p>
+            {{ form.valor_dif.label }}<br>
+            {{ form.valor_dif(size=20) }}<br>
+            {% for error in form.valor_dif.errors %}
+                {% if (error != 'This field is required.') %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endif %}
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.sugestao.label }}<br>
+            {{ form.sugestao(size=1) }}<br>
+        </p>
+        <p>
+            {{ form.percentual.label }}<br>
+            {{ form.percentual(size=1) }}<br>
+        </p>
+        <p>
+            {{ form.ativo.label }}<br>
+            {{ form.ativo(size=1) }}<br>
+        </p>
+
+        <p>{{ wtf.form_field(form.submit, class="btn btn-default pull-left") }}</p>
+    </form>
+{% endblock %}

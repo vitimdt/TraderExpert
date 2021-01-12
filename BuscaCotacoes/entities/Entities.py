@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Date, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.sql import text
 
 Base = declarative_base()
 
@@ -9,7 +10,6 @@ class Acao(Base):
     id = Column(Integer, primary_key=True)
     codigo = Column(String(8))
     nome = Column(String(70))
-    nome_api = Column(String(255))
 
     cotacoes = relationship('CotacaoTempoReal', backref="acoes")
 
@@ -24,6 +24,10 @@ class Acao(Base):
     def find_by_code(cls, session, codigo):
         return session.query(cls).filter_by(codigo=codigo).first()
 
+    @classmethod
+    def find_by_id(cls, session, id):
+        return session.query(cls).filter_by(id=id).first()
+
 class Configuracao(Base):
     __tablename__ = 'configuracao'
     id = Column(Integer, primary_key=True)
@@ -36,6 +40,22 @@ class Configuracao(Base):
     @classmethod
     def find_by_key(cls, session, chave):
         return session.query(cls).filter_by(chave=chave).first()
+
+class AcessoAPI(Base):
+    __tablename__ = 'acessoapi'
+    id = Column(Integer, primary_key=True)
+    api_id = Column(Integer, ForeignKey('configuracao.id'))
+    acao_id = Column(Integer, ForeignKey('acao.id'))
+    nome_api = Column(String(255))
+    api = relationship('Configuracao')
+    acao = relationship('Acao')
+
+    def __repr__(self):
+        return f'AcessoAPI {self.api_id} - {self.nome_api}'
+
+    @classmethod
+    def find_by_api_acao(cls, session, api_id, acao_id):
+        return session.query(cls).filter_by(api_id=api_id, acao_id=acao_id).first()
 
 class CotacaoTempoReal(Base):
     __tablename__ = 'cotacao_temporeal'
@@ -78,3 +98,32 @@ class Carteira(Base):
     @classmethod
     def find_all(cls, session):
         return session.query(cls).all()
+
+class Monitoramento(Base):
+    __tablename__ = 'monitoramento'
+    id = Column(Integer, primary_key=True)
+    acao_id = Column(Integer, ForeignKey('acao.id'))
+    valor_ref = Column(Float)
+    operador = Column(String(2))
+    valor_meta_dif = Column(Float)
+    sugestao = Column(String(50))
+    flg_percentual = Column(String(1))
+    flg_ativo = Column(String(1))
+    acao = relationship('Acao')
+
+    def __repr__(self):
+        return f'Monitoramento {self.acao_id} - {self.valor_ref} - {self.operador} - {self.valor_meta_dif}'
+
+    @classmethod
+    def find_by_ativos(cls, session):
+        return session.query(cls).filter_by(flg_ativo='S').all()
+
+    @classmethod
+    def find_monitoramento_fora_carteira(cls, conn):
+        qry = text("select monitoramento.id, monitoramento.acao_id, monitoramento.valor_ref, "
+                   "monitoramento.operador, monitoramento.valor_meta_dif, monitoramento.sugestao, "
+                   "monitoramento.flg_percentual, monitoramento.flg_ativo from monitoramento, acao "
+                   "where monitoramento.acao_id = acao.id and "
+                   "monitoramento.acao_id not in (select c.acao_id from carteira c) and "
+                   "monitoramento.flg_ativo='S'")
+        return conn.execute(qry).fetchall()

@@ -1,0 +1,87 @@
+{% extends 'bootstrap/base.html' %}
+{% block title %}
+    {% if title %}{{ title }} - Trader Expert{% else %}Bem vindo ao Trader Expert{% endif %}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    {{ moment.include_moment() }}
+    {{ moment.lang(g.locale) }}
+    <script>
+        function set_count_acoes(n) {
+            $('#count_acoes').text(n);
+            $('#count_acoes').css('visibility', n != '0' ? 'visible' : 'hidden');
+        }
+
+        function verificarNotificacoes() {
+            $.ajax('{{ url_for('main.notifications') }}').done(
+                function(notifications) {
+                    for (var i = 0; i < notifications.length; i++) {
+                        switch (notifications[i].name) {
+                            case 'acoes_sugeridas':
+                                set_count_acoes(notifications[i].data);
+                                break;
+                        }
+                    }
+                }
+            );
+        }
+
+        $(function() {
+            setInterval(function (){ verificarNotificacoes(); } , 60000);
+        })
+
+        verificarNotificacoes();
+    </script>
+{% endblock %}
+
+{% block navbar %}
+    <nav class="navbar navbar-default">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <b><a class="navbar-brand" href="#">Trader Expert</a></b>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="{{ url_for('main.index') }}">Home</a></li>
+                    <li>
+                    <a href="{{ url_for('main.monitor') }}">Monitoramento
+                            <span id="count_acoes" class="badge" style="visibility: hidden;">
+                            </span></a>
+                    </li>
+                    <!--<li><a href="{{ url_for('main.monitor') }}">Monitoramento</a></li>-->
+                    <li><a href="{{ url_for('main.minhacarteira') }}">Minha Carteira</a></li>
+                </ul>
+
+                <ul class="nav navbar-nav navbar-right">
+                    {% if true %}
+                    <li><a href="#">Login</a></li>
+                    {% else %}
+                    <li><a href="#">Logout</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-info" role="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {# application content needs to be provided in the app_content block #}
+        {% block app_content %}{% endblock %}
+    </div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block scripts %}
+  <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script>
+	$(":checkbox").on("click", function(){
+		if ( $(this).prop('checked') ){
+			idSel = $(this).prop('id');
+			$("#carteiraSel").prop('value', idSel);
+			$.each($("input[type='checkbox']"), function(id , val){
+				if ($(val).prop('id') != idSel){
+					$(val).prop('checked', false);
+				}
+			});
+		}
+	});
+
+	function confirmDelete(id){
+		var ok = confirm("Deseja realmente excluir a ação da sua carteira?");
+		if (ok == true) {
+			$.ajax({
+					url: '/traderexpert/removeracao',
+					type: 'GET',
+					data: {acaoid: id},
+					success: function(response){
+						$("#acoes_carteira").html(response);
+					},
+					error: function(xhr){
+						alert('Request failed :' + xhr.responseText);
+					}
+			});
+		}
+    }
+
+  </script>
+
+{% endblock %}
+
+{% block app_content %}
+<h2><b>Minha Carteira</b></h2>
+
+	<div id="acoes_carteira">
+		{% include '_acoesCarteira.html' %}
+	</div>
+	<form action="{{ url_for('main.mantercarteira') }}" method="GET">
+		{{ form.carteiraSel() }}
+		<p>{{ wtf.form_field(form.submit, class="btn btn-default pull-right") }}</p>
+	</form>
+{% endblock %}
