@@ -48,8 +48,8 @@ class Configuracao(db.Model):
 class AcessoAPI(db.Model):
     __tablename__ = 'acessoapi'
     id = db.Column(db.Integer, primary_key=True)
-    api_id = db.Column(db.Integer, db.ForeignKey('acao.id'))
-    acao_id = db.Column(db.Integer, db.ForeignKey('configuracao.id'))
+    api_id = db.Column(db.Integer, db.ForeignKey('configuracao.id'))
+    acao_id = db.Column(db.Integer, db.ForeignKey('acao.id'))
     nome_api = db.Column(db.String(255))
     acao = db.relationship('Acao')
     api = db.relationship('Configuracao')
@@ -58,7 +58,7 @@ class AcessoAPI(db.Model):
         return f'AcessoAPI {self.id} - {self.nome_api}'
 
     def find_by_id(self, idAcessoAPI):
-        return Configuracao.query.filter_by(id=idAcessoAPI).first()
+        return AcessoAPI.query.filter_by(id=idAcessoAPI).first()
 
     @classmethod
     def retornarAcessosAPI(cls):

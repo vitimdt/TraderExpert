@@ -19,8 +19,8 @@
 {% endblock %}
 
 {% block app_content %}
-    <h2><b>Ações Cadastradas</b></h2>
-    <form action="{{ url_for('main.acaoacesso') }}" method="GET">
+    <h2><b>Acesso Ações</b></h2>
+    <form action="{{ url_for('main.manteracessoacao') }}" method="GET">
         <table class="table table-striped" id="users">
 			 <thead>
 			  {%- for column in columns %}

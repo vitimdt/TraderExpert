@@ -6,8 +6,8 @@ from app.main.forms.configMonitorForm import ConfigMonitorForm
 from app.main.forms.monitoramentoForm import MonitoramentoForm
 from app.main.forms.carteiraForm import CarteiraForm
 from app.main.forms.acaoCarteiraForm import AcaoCarteiraForm
-from app.main.forms.acoesCadastradasForm import AcoesCadastradasForm
-from app.main.forms.acaoAcessoForm import AcaoAcessoForm
+from app.main.forms.acessoAcoesForm import AcessoAcoesForm
+from app.main.forms.manterAcessoAcaoForm import ManterAcessoAcaoForm
 
 
 @bp.route('/traderexpert/', methods=['GET'])
@@ -85,16 +85,16 @@ def todosmonitores():
     return render_template('monitores.html', title='Monitoramentos', form=form, columns=cols, items=rs)
 
 
-@bp.route('/traderexpert/acoescadastradas', methods=['GET'])
-def acoescadastradas():
-    form = AcoesCadastradasForm()
+@bp.route('/traderexpert/acessoacoes', methods=['GET'])
+def acessoacoes():
+    form = AcessoAcoesForm()
     cols, rs = AcessoAPI.retornarAcessosAPI()
-    return render_template('acoesCadastradas.html', title='Ações Cadastradas', form=form, columns=cols, items=rs)
+    return render_template('acessoAcoes.html', title='Ações Cadastradas', form=form, columns=cols, items=rs)
 
 
-@bp.route('/traderexpert/acaoacesso', methods=['GET', 'POST'])
-def acaoacesso():
-    acaoacesso_form = AcaoAcessoForm()
+@bp.route('/traderexpert/manteracessoacao', methods=['GET', 'POST'])
+def manteracessoacao():
+    acessoacao_form = ManterAcessoAcaoForm()
     obj_acessoApi = AcessoAPI()
     acessoApi = None
     id = "0"
@@ -105,27 +105,27 @@ def acaoacesso():
             id = str(acessoSel).split('_')[1]
         else:
             id = "0"
-    if acaoacesso_form.validate_on_submit():
+    if acessoacao_form.validate_on_submit():
         if id != "0":
             acessoApi = obj_acessoApi.find_by_id(idAcessoAPI=int(id))
         else:
             acessoApi = AcessoAPI()
-        acessoApi.acao_id = acaoacesso_form.acao.data
-        acessoApi.api_id = acaoacesso_form.API.data
-        acessoApi.nome_api = acaoacesso_form.nome_api.data
+        acessoApi.acao_id = acessoacao_form.acao.data
+        acessoApi.api_id = acessoacao_form.API.data
+        acessoApi.nome_api = acessoacao_form.nome_api.data
         if id == "0":
             db.session.add(acessoApi)
         db.session.commit()
         flash('Suas alterações foram gravadas com sucesso.')
-        return redirect(url_for('main.acaoacesso'))
+        return redirect(url_for('main.manteracessoacao'))
     elif request.method == 'GET':
         if id != "0":
             acessoApi = obj_acessoApi.find_by_id(idAcessoAPI=int(id))
-            acaoacesso_form.novo = False
-            acaoacesso_form.acao.data = str(acessoApi.acao.id)
-            acaoacesso_form.API.data = str(acessoApi.api.id)
-            acaoacesso_form.nome_api = str(acessoApi.nome_api)
-    return render_template('acaoAcesso.html', title='Configurar Ação e Acesso', form=acaoacesso_form)
+            acessoacao_form.novo = False
+            acessoacao_form.acao.data = str(acessoApi.acao_id)
+            acessoacao_form.API.data = str(acessoApi.api_id)
+            acessoacao_form.nome_api.data = acessoApi.nome_api
+    return render_template('manterAcessoAcao.html', title='Manter Acesso Ação', form=acessoacao_form)
 
 
 @bp.route('/traderexpert/removermonitor', methods=['GET'])
