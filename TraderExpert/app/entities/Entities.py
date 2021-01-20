@@ -8,7 +8,7 @@ class Acao(db.Model):
     codigo = db.Column(db.String(8))
     nome = db.Column(db.String(70))
 
-    cotacoes = db.relationship('CotacaoTempoReal', backref="acoes")
+    #cotacoes = db.relationship('CotacaoTempoReal', backref="acao")
 
     def __repr__(self):
         return f'Ação {self.nome}'
@@ -37,6 +37,44 @@ class Configuracao(db.Model):
 
     def find_by_key(self, chave):
         return Configuracao.query.filter_by(chave=chave).first()
+
+    def retorna_lista_configuracoes(self):
+        configs = Configuracao.query.all()
+        lista = []
+        for config in configs:
+            lista.append((config.id, config.chave))
+        return lista
+
+class AcessoAPI(db.Model):
+    __tablename__ = 'acessoapi'
+    id = db.Column(db.Integer, primary_key=True)
+    api_id = db.Column(db.Integer, db.ForeignKey('acao.id'))
+    acao_id = db.Column(db.Integer, db.ForeignKey('configuracao.id'))
+    nome_api = db.Column(db.String(255))
+    acao = db.relationship('Acao')
+    api = db.relationship('Configuracao')
+
+    def __repr__(self):
+        return f'AcessoAPI {self.id} - {self.nome_api}'
+
+    def find_by_id(self, idAcessoAPI):
+        return Configuracao.query.filter_by(id=idAcessoAPI).first()
+
+    @classmethod
+    def retornarAcessosAPI(cls):
+        qry = text("SELECT acessoapi.id, acao.codigo, acao.nome, configuracao.chave, acessoapi.nome_api "
+                   " FROM acao, configuracao, acessoapi WHERE acao.id = acessoapi.acao_id and "
+                   " acessoapi.api_id = configuracao.id order by acao.codigo")
+        columns = ['ID', 'Código', 'Nome', 'API', 'Acesso API']
+        acessosApi = db.engine.execute(qry).fetchall()
+        resultSet = []
+        for lin in acessosApi:
+            resultSet.append({columns[0]: lin[0],
+                              columns[1]: lin[1],
+                              columns[2]: lin[2],
+                              columns[3]: lin[3],
+                              columns[4]: lin[4]})
+        return columns, resultSet
 
 class CotacaoTempoReal(db.Model):
     __tablename__ = 'cotacao_temporeal'

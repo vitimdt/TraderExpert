@@ -1,11 +1,13 @@
 from flask import render_template, request, url_for, redirect, flash, jsonify
 from app import db
 from app.main import bp
-from app.entities.Entities import CotacaoTempoReal, Monitoramento, Carteira
+from app.entities.Entities import CotacaoTempoReal, Monitoramento, Carteira, AcessoAPI, Acao
 from app.main.forms.configMonitorForm import ConfigMonitorForm
 from app.main.forms.monitoramentoForm import MonitoramentoForm
 from app.main.forms.carteiraForm import CarteiraForm
 from app.main.forms.acaoCarteiraForm import AcaoCarteiraForm
+from app.main.forms.acoesCadastradasForm import AcoesCadastradasForm
+from app.main.forms.acaoAcessoForm import AcaoAcessoForm
 
 
 @bp.route('/traderexpert/', methods=['GET'])
@@ -82,6 +84,50 @@ def todosmonitores():
     cols, rs = Monitoramento.todosMonitoramentos()
     return render_template('monitores.html', title='Monitoramentos', form=form, columns=cols, items=rs)
 
+
+@bp.route('/traderexpert/acoescadastradas', methods=['GET'])
+def acoescadastradas():
+    form = AcoesCadastradasForm()
+    cols, rs = AcessoAPI.retornarAcessosAPI()
+    return render_template('acoesCadastradas.html', title='Ações Cadastradas', form=form, columns=cols, items=rs)
+
+
+@bp.route('/traderexpert/acaoacesso', methods=['GET', 'POST'])
+def acaoacesso():
+    acaoacesso_form = AcaoAcessoForm()
+    obj_acessoApi = AcessoAPI()
+    acessoApi = None
+    id = "0"
+    params = request.args
+    if "acessoSel" in params:
+        acessoSel = params["acessoSel"]
+        if acessoSel != "0":
+            id = str(acessoSel).split('_')[1]
+        else:
+            id = "0"
+    if acaoacesso_form.validate_on_submit():
+        if id != "0":
+            acessoApi = obj_acessoApi.find_by_id(idAcessoAPI=int(id))
+        else:
+            acessoApi = AcessoAPI()
+        acessoApi.acao_id = acaoacesso_form.acao.data
+        acessoApi.api_id = acaoacesso_form.API.data
+        acessoApi.nome_api = acaoacesso_form.nome_api.data
+        if id == "0":
+            db.session.add(acessoApi)
+        db.session.commit()
+        flash('Suas alterações foram gravadas com sucesso.')
+        return redirect(url_for('main.acaoacesso'))
+    elif request.method == 'GET':
+        if id != "0":
+            acessoApi = obj_acessoApi.find_by_id(idAcessoAPI=int(id))
+            acaoacesso_form.novo = False
+            acaoacesso_form.acao.data = str(acessoApi.acao.id)
+            acaoacesso_form.API.data = str(acessoApi.api.id)
+            acaoacesso_form.nome_api = str(acessoApi.nome_api)
+    return render_template('acaoAcesso.html', title='Configurar Ação e Acesso', form=acaoacesso_form)
+
+
 @bp.route('/traderexpert/removermonitor', methods=['GET'])
 def removermonitor():
     id_monitor = request.args.get('monitorid')
@@ -91,6 +137,7 @@ def removermonitor():
     form = MonitoramentoForm()
     cols, rs = Monitoramento.todosMonitoramentos()
     return render_template('_monitores.html', form=form, columns=cols, items=rs)
+
 
 @bp.route('/traderexpert/minhacarteira', methods=['GET'])
 def minhacarteira():
@@ -151,6 +198,7 @@ def removeracao():
     form = CarteiraForm()
     cols, rs = Carteira.retornarCarteira()
     return render_template('_acoesCarteira.html', form=form, columns=cols, items=rs)
+
 
 @bp.route('/traderexpert/notifications')
 def notifications():

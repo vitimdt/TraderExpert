@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block scripts %}
+  <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+  <script>
+	$(":checkbox").on("click", function(){
+		if ( $(this).prop('checked') ){
+			idSel = $(this).prop('id');
+			$("#acessoSel").prop('value', idSel);
+			$.each($("input[type='checkbox']"), function(id , val){
+				if ($(val).prop('id') != idSel){
+					$(val).prop('checked', false);
+				}
+			});
+		}
+	});
+  </script>
+{% endblock %}
+
+{% block app_content %}
+    <h2><b>Ações Cadastradas</b></h2>
+    <form action="{{ url_for('main.acaoacesso') }}" method="GET">
+        <table class="table table-striped" id="users">
+			 <thead>
+			  {%- for column in columns %}
+				{% if (column == 'ID') %}
+				 <th></th>
+				{% else %}
+				 <th>{{ column }}</th>
+				{% endif %}
+			  {%- endfor %}
+			 </thead>
+
+			 <tbody>
+			 {%- for row in items %}
+				<tr>
+				{%- for column in columns %}
+					{% if (column == 'ID') %}
+						<td><input type="checkbox" class="custom-control-input" id="idAcesso_{{ row[column] }}"></td>
+					{% else %}
+						<td>{{ row[column] }}</td>
+					{% endif %}
+				{%- endfor %}
+				</tr>
+			 {%- endfor %}
+			 </tbody>
+		</table>
+        {{ form.acessoSel() }}
+		<p>{{ wtf.form_field(form.submit, class="btn btn-default pull-right") }}</p>
+    </form>
+{% endblock %}
