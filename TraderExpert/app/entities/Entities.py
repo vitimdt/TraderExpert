@@ -65,7 +65,7 @@ class AcessoAPI(db.Model):
         qry = text("SELECT acessoapi.id, acao.codigo, acao.nome, configuracao.chave, acessoapi.nome_api "
                    " FROM acao, configuracao, acessoapi WHERE acao.id = acessoapi.acao_id and "
                    " acessoapi.api_id = configuracao.id order by acao.codigo")
-        columns = ['ID', 'Código', 'Nome', 'API', 'Acesso API']
+        columns = ['ID', 'Código', 'Nome', 'API', 'Acesso API', 'Excluir']
         acessosApi = db.engine.execute(qry).fetchall()
         resultSet = []
         for lin in acessosApi:
@@ -73,7 +73,8 @@ class AcessoAPI(db.Model):
                               columns[1]: lin[1],
                               columns[2]: lin[2],
                               columns[3]: lin[3],
-                              columns[4]: lin[4]})
+                              columns[4]: lin[4],
+                              columns[5]: lin[0]})
         return columns, resultSet
 
 class CotacaoTempoReal(db.Model):

@@ -1,6 +1,19 @@
 {% extends "base.html" %}
 {% import 'bootstrap/wtf.html' as wtf %}
 
+{% block scripts %}
+  <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+  <script>
+      function verificaForm(){
+        if ($("#nome_api").prop('value') != ''){
+            $("#acao").prop('disabled', true);
+            $("#API").prop('disabled', true);
+        }
+      }
+      verificaForm();
+  </script>
+{% endblock %}
+
 {% block app_content %}
     <h2><b>Manter Acesso Ação</b></h2>
     <form action="" method="POST">
