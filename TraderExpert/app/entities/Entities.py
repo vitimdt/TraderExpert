@@ -60,6 +60,9 @@ class AcessoAPI(db.Model):
     def find_by_id(self, idAcessoAPI):
         return AcessoAPI.query.filter_by(id=idAcessoAPI).first()
 
+    def find_by_idAcao_idAPI(self, idAcao, idAPI):
+        return AcessoAPI.query.filter_by(acao_id=idAcao, api_id=idAPI).first()
+
     @classmethod
     def retornarAcessosAPI(cls):
         qry = text("SELECT acessoapi.id, acao.codigo, acao.nome, configuracao.chave, acessoapi.nome_api "

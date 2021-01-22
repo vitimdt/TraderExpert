@@ -20,7 +20,7 @@
 		var ok = confirm("Deseja realmente excluir o acesso da ação?");
 		if (ok == true) {
 			$.ajax({
-					url: '/traderexpert/',
+					url: '/traderexpert/removeracessoacao',
 					type: 'GET',
 					data: {acessoid: id},
 					success: function(response){

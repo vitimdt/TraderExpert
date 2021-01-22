@@ -85,6 +85,17 @@ def todosmonitores():
     return render_template('monitores.html', title='Monitoramentos', form=form, columns=cols, items=rs)
 
 
+@bp.route('/traderexpert/removermonitor', methods=['GET'])
+def removermonitor():
+    id_monitor = request.args.get('monitorid')
+    itemMonitor = Monitoramento.query.filter_by(id=id_monitor).first_or_404()
+    db.session.delete(itemMonitor)
+    db.session.commit()
+    form = MonitoramentoForm()
+    cols, rs = Monitoramento.todosMonitoramentos()
+    return render_template('_monitores.html', form=form, columns=cols, items=rs)
+
+
 @bp.route('/traderexpert/acessoacoes', methods=['GET'])
 def acessoacoes():
     form = AcessoAcoesForm()
@@ -110,33 +121,39 @@ def manteracessoacao():
             acessoApi = obj_acessoApi.find_by_id(idAcessoAPI=int(id))
         else:
             acessoApi = AcessoAPI()
-        acessoApi.acao_id = acessoacao_form.acao.data
-        acessoApi.api_id = acessoacao_form.API.data
+            acessoApi.acao_id = acessoacao_form.acao.data
+            acessoApi.api_id = acessoacao_form.API.data
         acessoApi.nome_api = acessoacao_form.nome_api.data
         if id == "0":
-            db.session.add(acessoApi)
+            acessoAux = obj_acessoApi.find_by_idAcao_idAPI(idAcao=acessoApi.acao_id, idAPI=acessoApi.api_id)
+            if acessoAux is None:
+                db.session.add(acessoApi)
+            else:
+                error = 'Já existe o acesso ação cadastrado no sistema.'
+                acessoacao_form.nome_api.data = ""
+                return render_template('manterAcessoAcao.html', title='Manter Acesso Ação',
+                                       form=acessoacao_form, error=error)
         db.session.commit()
         flash('Suas alterações foram gravadas com sucesso.')
         return redirect(url_for('main.manteracessoacao'))
     elif request.method == 'GET':
         if id != "0":
             acessoApi = obj_acessoApi.find_by_id(idAcessoAPI=int(id))
-            acessoacao_form.novo = False
             acessoacao_form.acao.data = str(acessoApi.acao_id)
             acessoacao_form.API.data = str(acessoApi.api_id)
             acessoacao_form.nome_api.data = acessoApi.nome_api
     return render_template('manterAcessoAcao.html', title='Manter Acesso Ação', form=acessoacao_form)
 
 
-@bp.route('/traderexpert/removermonitor', methods=['GET'])
-def removermonitor():
-    id_monitor = request.args.get('monitorid')
-    itemMonitor = Monitoramento.query.filter_by(id=id_monitor).first_or_404()
-    db.session.delete(itemMonitor)
+@bp.route('/traderexpert/removeracessoacao', methods=['GET'])
+def removeracessoacao():
+    id_acesso = request.args.get('acessoid')
+    itemAcesso = AcessoAPI.query.filter_by(id=id_acesso).first_or_404()
+    db.session.delete(itemAcesso)
     db.session.commit()
-    form = MonitoramentoForm()
-    cols, rs = Monitoramento.todosMonitoramentos()
-    return render_template('_monitores.html', form=form, columns=cols, items=rs)
+    form = AcessoAcoesForm()
+    cols, rs = AcessoAPI.retornarAcessosAPI()
+    return render_template('_acessoAcoes.html', form=form, columns=cols, items=rs)
 
 
 @bp.route('/traderexpert/minhacarteira', methods=['GET'])
