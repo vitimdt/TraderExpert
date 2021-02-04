@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <h2><b>Cadastrar Nova Ação</b></h2>
+    <a href="{{ url_for('main.manteracessoacao') }}" class="btn btn-default pull-right">Voltar</a>
+    <form action="" method="POST">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.codigo_acao.label }}<br>
+            {{ form.codigo_acao(size=8) }}<br>
+        </p>
+        <p>
+            {{ form.nome_acao.label }}<br>
+            {{ form.nome_acao(size=70) }}<br>
+        </p>
+
+        <p>{{ wtf.form_field(form.submit, class="btn btn-default pull-left") }}</p>
+    </form>
+{% endblock %}

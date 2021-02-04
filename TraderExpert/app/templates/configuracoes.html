@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block scripts %}
+  <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+  <script>
+	$(":checkbox").on("click", function(){
+		if ( $(this).prop('checked') ){
+			idSel = $(this).prop('id');
+			$("#configSel").prop('value', idSel);
+			$.each($("input[type='checkbox']"), function(id , val){
+				if ($(val).prop('id') != idSel){
+					$(val).prop('checked', false);
+				}
+			});
+		}
+	});
+
+	function confirmDelete(id){
+		var ok = confirm("Deseja realmente excluir a configuração?");
+		if (ok == true) {
+			$.ajax({
+					url: '/traderexpert/',
+					type: 'GET',
+					data: {configid: id},
+					success: function(response){
+						$("#area_configs").html(response);
+					},
+					error: function(xhr){
+						alert('Request failed :' + xhr.responseText);
+					}
+			});
+		}
+    }
+  </script>
+{% endblock %}
+
+{% block app_content %}
+<h2><b>Configurações</b></h2>
+	<a href="{{ url_for('main.manteracessoacao') }}" class="btn btn-default pull-right">Voltar</a>
+	<div id="area_configs">
+		{% include '_configuracoes.html' %}
+	</div>
+	<form action="{{ url_for('main.configmonitor') }}" method="GET">
+		{{ form.configSel() }}
+		<p>{{ wtf.form_field(form.submit, class="btn btn-default pull-right") }}</p>
+	</form>
+{% endblock %}

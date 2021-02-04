@@ -45,6 +45,20 @@ class Configuracao(db.Model):
             lista.append((config.id, config.chave))
         return lista
 
+    @classmethod
+    def retornarConfiguracoes(cls):
+        qry = text("select configuracao.id, configuracao.chave, configuracao.valor from configuracao "
+                   " order by configuracao.chave")
+        columns = ['ID', 'Chave', 'Valor', 'Excluir']
+        configs = db.engine.execute(qry).fetchall()
+        resultSet = []
+        for lin in configs:
+            resultSet.append({columns[0]: lin[0],
+                              columns[1]: lin[1],
+                              columns[2]: lin[2],
+                              columns[3]: lin[0]})
+        return columns, resultSet
+
 class AcessoAPI(db.Model):
     __tablename__ = 'acessoapi'
     id = db.Column(db.Integer, primary_key=True)

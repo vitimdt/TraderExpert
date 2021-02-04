@@ -16,6 +16,9 @@
 
 {% block app_content %}
     <h2><b>Manter Acesso Ação</b></h2>
+    <a href="{{ url_for('main.acessoacoes') }}" class="btn btn-default pull-right">Voltar</a>
+    <a href="{{ url_for('main.configuracoes') }}" class="btn btn-default pull-right">Configurações</a>
+    <a href="{{ url_for('main.cadastraracoes') }}" class="btn btn-default pull-right">Cadastrar Ações</a>
     <form action="" method="POST">
         {{ form.hidden_tag() }}
         <p>

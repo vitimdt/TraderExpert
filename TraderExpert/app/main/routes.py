@@ -1,13 +1,16 @@
 from flask import render_template, request, url_for, redirect, flash, jsonify
 from app import db
 from app.main import bp
-from app.entities.Entities import CotacaoTempoReal, Monitoramento, Carteira, AcessoAPI, Acao
+from app.entities.Entities import CotacaoTempoReal, Monitoramento, Carteira, AcessoAPI, Configuracao, Acao
 from app.main.forms.configMonitorForm import ConfigMonitorForm
 from app.main.forms.monitoramentoForm import MonitoramentoForm
 from app.main.forms.carteiraForm import CarteiraForm
 from app.main.forms.acaoCarteiraForm import AcaoCarteiraForm
 from app.main.forms.acessoAcoesForm import AcessoAcoesForm
 from app.main.forms.manterAcessoAcaoForm import ManterAcessoAcaoForm
+from app.main.forms.cadastrarAcoesForm import CadastrarAcoesForm
+from app.main.forms.manterConfiguracao import ManterConfiguracaoForm
+from app.main.forms.configuracoesForm import ConfiguracoesForm
 
 
 @bp.route('/traderexpert/', methods=['GET'])
@@ -204,6 +207,34 @@ def mantercarteira():
             carteira_form.data_compra.data = acao_carteira.data_compra
             carteira_form.valor_total.data = str(acao_carteira.valor_total).replace('.', ',')
     return render_template('manterAcaoCarteira.html', title='Manter Carteira', form=carteira_form)
+
+
+@bp.route('/traderexpert/cadastraracoes', methods=['POST', 'GET'])
+def cadastraracoes():
+    form = CadastrarAcoesForm()
+    obj_acao = Acao()
+    if form.validate_on_submit():
+        obj_acao.codigo = form.codigo_acao.data
+        obj_acao.nome = form.nome_acao.data
+        acaoAux = obj_acao.find_by_code(codigo=obj_acao.codigo)
+        if acaoAux is None:
+            db.session.add(obj_acao)
+        else:
+            error = 'Já existe o código de ação ( ' + obj_acao.codigo + ') cadastrado no sistema.'
+            form.codigo_acao.data = ""
+            form.nome_acao.data = ""
+            return render_template('cadastrarAcoes.html', title='Cadastrar Ações', form=form, error=error)
+        db.session.commit()
+        flash('Suas alterações foram gravadas com sucesso.')
+        return redirect(url_for('main.manteracessoacao'))
+    return render_template('cadastrarAcoes.html', title='Cadastrar Ações', form=form)
+
+
+@bp.route('/traderexpert/configuracoes', methods=['GET'])
+def configuracoes():
+    form = ConfiguracoesForm()
+    cols, rs = Configuracao.retornarConfiguracoes()
+    return render_template('configuracoes.html', title='Configurações', form=form, columns=cols, items=rs)
 
 
 @bp.route('/traderexpert/removeracao', methods=['GET'])
