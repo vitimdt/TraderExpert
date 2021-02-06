@@ -237,6 +237,57 @@ def configuracoes():
     return render_template('configuracoes.html', title='Configurações', form=form, columns=cols, items=rs)
 
 
+@bp.route('/traderexpert/removerconfiguracao', methods=['GET'])
+def removerconfiguracao():
+    id_config = request.args.get('configid')
+    itemConfig = Configuracao.query.filter_by(id=id_config).first_or_404()
+    db.session.delete(itemConfig)
+    db.session.commit()
+    form = ConfiguracoesForm()
+    cols, rs = Configuracao.retornarConfiguracoes()
+    return render_template('_configuracoes.html', form=form, columns=cols, items=rs)
+
+
+@bp.route('/traderexpert/manterconfiguracao', methods=['GET', 'POST'])
+def manterconfiguracao():
+    form = ManterConfiguracaoForm()
+    obj_config = Configuracao()
+    config = None
+    id = "0"
+    params = request.args
+    if "configSel" in params:
+        config_sel = params["configSel"]
+        if config_sel != "0":
+            id = str(config_sel).split('_')[1]
+            config = obj_config.find_by_id(idConfig=int(id))
+            form.chave.data = config.chave
+        else:
+            id = "0"
+    if form.validate_on_submit():
+        if id == "0":
+            config = Configuracao()
+            config.chave = form.chave.data
+        config.valor = form.valor.data
+        if id == "0":
+            configAux = obj_config.find_by_key(chave=config.chave)
+            if configAux is None:
+                db.session.add(config)
+            else:
+                error = 'Já existe a chave (' + config.chave + ') cadastrada no sistema.'
+                form.chave.data = ""
+                form.valor.data = ""
+                return render_template('manterConfiguracao.html', title='Manter Configuração', form=form, error=error)
+        db.session.commit()
+        flash('Suas alterações foram gravadas com sucesso.')
+        return redirect(url_for('main.configuracoes'))
+    elif request.method == 'GET':
+        if id != "0":
+            config = obj_config.find_by_id(idConfig=int(id))
+            form.chave.data = str(config.chave)
+            form.valor.data = str(config.valor)
+    return render_template('manterConfiguracao.html', title='Manter Configuração', form=form)
+
+
 @bp.route('/traderexpert/removeracao', methods=['GET'])
 def removeracao():
     id_acao = request.args.get('acaoid')

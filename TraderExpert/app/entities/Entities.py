@@ -35,6 +35,9 @@ class Configuracao(db.Model):
     def __repr__(self):
         return f'Configuração {self.chave}'
 
+    def find_by_id(self, idConfig):
+        return Configuracao.query.filter_by(id=idConfig).first()
+
     def find_by_key(self, chave):
         return Configuracao.query.filter_by(chave=chave).first()
 
