@@ -48,12 +48,11 @@ def configmonitor():
         monitorsel = params["monitorSel"]
         if monitorsel != "0":
             id = str(monitorsel).split('_')[1]
+            monitoramento = obj_monitoramento.find_by_id(id_monitoramento=int(id))
         else:
             id = "0"
     if monitor_form.validate_on_submit():
-        if id != "0":
-            monitoramento = obj_monitoramento.find_by_id(id_monitoramento=int(id))
-        else:
+        if id == "0":
             monitoramento = Monitoramento()
         monitoramento.acao_id = monitor_form.acao.data
         monitoramento.valor_ref = monitor_form.valor_ref.data.replace(',', '.')
@@ -117,12 +116,11 @@ def manteracessoacao():
         acessoSel = params["acessoSel"]
         if acessoSel != "0":
             id = str(acessoSel).split('_')[1]
+            acessoApi = obj_acessoApi.find_by_id(idAcessoAPI=int(id))
         else:
             id = "0"
     if acessoacao_form.validate_on_submit():
-        if id != "0":
-            acessoApi = obj_acessoApi.find_by_id(idAcessoAPI=int(id))
-        else:
+        if id == "0":
             acessoApi = AcessoAPI()
             acessoApi.acao_id = acessoacao_form.acao.data
             acessoApi.api_id = acessoacao_form.API.data
@@ -177,12 +175,11 @@ def mantercarteira():
         carteira_sel = params["carteiraSel"]
         if carteira_sel != "0":
             id = str(carteira_sel).split('_')[1]
+            acao_carteira = obj_carteira.find_by_id(id_carteira=int(id))
         else:
             id = "0"
     if carteira_form.validate_on_submit():
-        if id != "0":
-            acao_carteira = obj_carteira.find_by_id(id_carteira=int(id))
-        else:
+        if id == "0":
             acao_carteira = Carteira()
         acao_carteira.acao_id = carteira_form.acao.data
         acao_carteira.email = carteira_form.email.data

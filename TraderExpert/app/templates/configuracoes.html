@@ -25,6 +25,7 @@
 					data: {configid: id},
 					success: function(response){
 						$("#area_configs").html(response);
+						$("#configSel").prop('value', '0');
 					},
 					error: function(xhr){
 						alert('Request failed :' + xhr.responseText);

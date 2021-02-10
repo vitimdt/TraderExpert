@@ -26,6 +26,7 @@
 					data: {acaoid: id},
 					success: function(response){
 						$("#acoes_carteira").html(response);
+						$("#carteiraSel").prop('value', '0');
 					},
 					error: function(xhr){
 						alert('Request failed :' + xhr.responseText);

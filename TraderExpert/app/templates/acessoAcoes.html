@@ -25,6 +25,7 @@
 					data: {acessoid: id},
 					success: function(response){
 						$("#acessos_acoes").html(response);
+						$("#acessoSel").prop('value', '0');
 					},
 					error: function(xhr){
 						alert('Request failed :' + xhr.responseText);
