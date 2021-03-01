@@ -121,7 +121,7 @@ class CotacaoTempoReal(db.Model):
 
     @classmethod
     def buscaCotacaoTR(cls):
-        qry = text("SELECT tab.codigo, tab.nome, tab.valor, tab.quantidade, tab.valor_cotacao, tab.DIF, "
+        qry = text("SELECT distinct tab.codigo, tab.nome, tab.valor, tab.quantidade, tab.valor_cotacao, tab.DIF, "
                    "tab.Valor_Total_Invest, tab.Valor_Total_Bolsa, tab.Percentual, tab.data_atualizacao, "
                    "tab.hora_pregao, tab.valor_taxas FROM (SELECT ct.id, a.codigo, a.nome, c.valor, c.quantidade, "
                    "ct.valor as Valor_Cotacao, ct.data_atualizacao, ct.hora_pregao, "
@@ -131,7 +131,8 @@ class CotacaoTempoReal(db.Model):
                    "(c.valor*c.quantidade),2), ' %') as Percentual, c.valor_taxas "
                    "FROM cotacao_temporeal ct, acao a, carteira c "
                    "WHERE ct.acao_id = a.id and c.acao_id = a.id and ct.data_atualizacao = "
-                   "(select max(aux.data_atualizacao) from cotacao_temporeal aux where aux.acao_id = a.id) "
+                   "(select max(aux.data_atualizacao) from cotacao_temporeal aux where aux.acao_id = a.id) and "
+                   "ct.hora_pregao = (select max(aux.hora_pregao) from cotacao_temporeal aux where aux.acao_id = a.id)"
                    ") AS tab ORDER BY tab.id")
         columns = ['Código', 'Nome', 'Valor Compra', 'Quantidade', 'Cotação', 'Diferença',
                    'Investimento', 'Total Cotação', 'Percentual', 'Hora Atualização', 'Hora Cotação']
