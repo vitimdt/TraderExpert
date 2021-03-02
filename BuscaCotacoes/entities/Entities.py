@@ -28,6 +28,20 @@ class Acao(Base):
     def find_by_id(cls, session, id):
         return session.query(cls).filter_by(id=id).first()
 
+    @classmethod
+    def find_acoes_monitoradas_fora_carteira(cls, conn):
+        qry = text("SELECT DISTINCT a.id, a.codigo, a.nome FROM acao a WHERE a.id IN ("
+                   "SELECT acao.id FROM monitoramento, acao WHERE monitoramento.acao_id = acao.id and "
+                   "monitoramento.acao_id NOT IN (SELECT c.acao_id FROM carteira c) AND "
+                   "monitoramento.flg_ativo = 'S')")
+        return conn.execute(qry).fetchall()
+
+    @classmethod
+    def find_acoes_carteira(cls, conn):
+        qry = text("SELECT DISTINCT a.id, a.codigo, a.nome FROM acao a WHERE a.id IN "
+                   "(SELECT c.acao_id FROM carteira c)")
+        return conn.execute(qry).fetchall()
+
 class Configuracao(Base):
     __tablename__ = 'configuracao'
     id = Column(Integer, primary_key=True)
