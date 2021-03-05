@@ -27,7 +27,7 @@ class BuscaCotacoes:
     def iniciarColetaCotacoes(self):
         data_hora = self.dateTimeNow()
         CotacaoTempoReal.clear_table(conn=self.dbConn.conn, dataAtual=data_hora)
-        while 10 <= data_hora.hour <= 24:
+        while 10 <= data_hora.hour < 19:
             self.coletar_cotacoes()
             self.coletar_cotacoes_monitoramento()
             print("[" + time.ctime() + "] Cotações coletadas com sucesso!")
