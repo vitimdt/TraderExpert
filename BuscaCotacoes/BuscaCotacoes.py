@@ -3,6 +3,7 @@ import urllib3
 import datetime
 import time
 import os
+import sys
 from dotenv import load_dotenv
 from db.DBConnection import DBConnection
 from entities.Entities import Configuracao, Carteira, CotacaoTempoReal, Monitoramento, Acao, AcessoAPI
@@ -27,7 +28,7 @@ class BuscaCotacoes:
     def iniciarColetaCotacoes(self):
         data_hora = self.dateTimeNow()
         CotacaoTempoReal.clear_table(conn=self.dbConn.conn, dataAtual=data_hora)
-        while 10 <= data_hora.hour < 18:
+        while 10 <= data_hora.hour <= 17:
             self.coletar_cotacoes()
             self.coletar_cotacoes_monitoramento()
             print("[" + time.ctime() + "] Cotações coletadas com sucesso!")
@@ -54,7 +55,7 @@ class BuscaCotacoes:
                                                hora_pregao=hora_pregao)
                     self.dbConn.session.add(cotacao)
                 except:
-                    print("Não foi possível recuperar cotação da ação: " + item.codigo)
+                    print("Não foi possível recuperar cotação da ação: " + item.codigo + ".")
             else:
                 print("Não existe Nome de API para ação: " + item.codigo)
         self.dbConn.session.commit()
@@ -79,20 +80,24 @@ class BuscaCotacoes:
                                                hora_pregao=hora_pregao)
                     self.dbConn.session.add(cotacao)
                 except:
-                    print("Não foi possível recuperar cotação da ação: " + acao.codigo)
+                    print("Não foi possível recuperar cotação da ação: " + acao.codigo + ".")
             else:
                 print("Não existe Nome de API para ação: " + acao.codigo)
         self.dbConn.session.commit()
 
     def extrairValorCotacao(self, msg):
-        if self.api_key == 'API_INFOM':
-            result = re.search(r'\<div class\=\"value\"\>\n                                    \<p\>[0-9\,]*\<\/p\>',
-                               msg).group()
-            result = re.split(r'\<p\>|\<\/p\>', result)[1]
-        elif self.api_key == 'API_INVES':
-            result = re.search(r'id\=\"last\_last\" dir\=\"ltr\"\>[0-9\,]*\<\/span\>',
-                               msg).group()
-            result = re.split(r'\>|\<\/span\>', result)[1]
+        try:
+            if self.api_key == 'API_INFOM':
+                result = re.search(r'\<div class\=\"value\"\>\n                                    \<p\>[0-9\,]*\<\/p\>',
+                                   msg).group()
+                result = re.split(r'\<p\>|\<\/p\>', result)[1]
+            elif self.api_key == 'API_INVES':
+                result = re.search(r'data-test\=\"instrument-price-last\"\>[0-9\,]*\<\/span\>',
+                                   msg).group()
+                result = re.split(r'\>|\<\/span\>', result)[1]
+        except Exception as ex:
+            print(ex)
+            result = ""
         return result
 
     def extrairHoraAtualizacao(self, msg):
