@@ -107,9 +107,10 @@ class BuscaCotacoes:
                 result = result.split('.')[0]
                 result = result.replace('h', ':')
             elif self.api_key == 'API_INVES':
-                result = re.search(r'\-time\"\>[0-9\:]*\<\/span\>', msg).group()
-                result = re.split(r'\>|\<\/span\>', result)[1]
-        except:
+                result = re.search(r'Z\"\>[0-9\:]*\<\/time\>', msg).group()
+                result = re.split(r'\>|\<\/time\>', result)[1]
+        except Exception as ex:
+            print(ex)
             result = ""
         return result
 
