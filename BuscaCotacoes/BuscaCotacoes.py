@@ -3,6 +3,7 @@ import urllib3
 import datetime
 import time
 import os
+import sys
 from dotenv import load_dotenv
 from db.DBConnection import DBConnection
 from entities.Entities import Configuracao, Carteira, CotacaoTempoReal, Monitoramento, Acao, AcessoAPI
@@ -27,7 +28,7 @@ class BuscaCotacoes:
     def iniciarColetaCotacoes(self):
         data_hora = self.dateTimeNow()
         CotacaoTempoReal.clear_table(conn=self.dbConn.conn, dataAtual=data_hora)
-        while 10 <= data_hora.hour <= 18:
+        while 10 <= data_hora.hour <= 17:
             self.coletar_cotacoes()
             self.coletar_cotacoes_monitoramento()
             print("[" + time.ctime() + "] Cotações coletadas com sucesso!")
@@ -37,35 +38,35 @@ class BuscaCotacoes:
 
     def coletar_cotacoes(self):
         config = Configuracao.find_by_key(self.dbConn.session, self.api_key)
-        cart = Carteira.find_all(self.dbConn.session)
+        acao = Acao.find_acoes_carteira(conn=self.dbConn.session)
         headers = {'User-Agent': self.user_agent}
 
-        for op in cart:
-            acesso_api = AcessoAPI.find_by_api_acao(self.dbConn.session, api_id=config.id, acao_id=op.acao.id)
+        for item in acao:
+            acesso_api = AcessoAPI.find_by_api_acao(self.dbConn.session, api_id=config.id, acao_id=item.id)
             if acesso_api is not None:
                 url = config.valor.format(acesso_api.nome_api)
                 response = self.http.request('GET', url, preload_content=False, headers=headers)
                 try:
                     hora_pregao = self.extrairHoraAtualizacao(response.data.decode('utf-8'))
                     valor = self.extrairValorCotacao(response.data.decode('utf-8'))
-                    cotacao = CotacaoTempoReal(acao_id=op.acao.id,
+                    cotacao = CotacaoTempoReal(acao_id=item.id,
                                                valor=float(valor.replace(',', '.')),
                                                data_atualizacao=self.dateTimeNow(),
                                                hora_pregao=hora_pregao)
                     self.dbConn.session.add(cotacao)
                 except:
-                    print("Não foi possível recuperar cotação da ação: " + op.acao.codigo)
+                    print("Não foi possível recuperar cotação da ação: " + item.codigo + ".")
             else:
-                print("Não existe Nome de API para ação: " + op.acao.codigo)
+                print("Não existe Nome de API para ação: " + item.codigo)
         self.dbConn.session.commit()
 
     def coletar_cotacoes_monitoramento(self):
         config = Configuracao.find_by_key(self.dbConn.session, self.api_key)
-        listaMonitor = Monitoramento.find_monitoramento_fora_carteira(conn=self.dbConn.conn)
+        listaAcaoMonitor = Acao.find_acoes_monitoradas_fora_carteira(conn=self.dbConn.conn)
         headers = {'User-Agent': self.user_agent}
 
-        for monitor in listaMonitor:
-            acao = Acao.find_by_id(self.dbConn.session, monitor.acao_id)
+        for item in listaAcaoMonitor:
+            acao = Acao.find_by_id(self.dbConn.session, item.id)
             acesso_api = AcessoAPI.find_by_api_acao(self.dbConn.session, api_id=config.id, acao_id=acao.id)
             if acesso_api is not None:
                 url = config.valor.format(acesso_api.nome_api)
@@ -73,26 +74,30 @@ class BuscaCotacoes:
                 try:
                     hora_pregao = self.extrairHoraAtualizacao(response.data.decode('utf-8'))
                     valor = self.extrairValorCotacao(response.data.decode('utf-8'))
-                    cotacao = CotacaoTempoReal(acao_id=monitor.acao_id,
+                    cotacao = CotacaoTempoReal(acao_id=item.id,
                                                valor=float(valor.replace(',', '.')),
                                                data_atualizacao=self.dateTimeNow(),
                                                hora_pregao=hora_pregao)
                     self.dbConn.session.add(cotacao)
                 except:
-                    print("Não foi possível recuperar cotação da ação: " + acao.codigo)
+                    print("Não foi possível recuperar cotação da ação: " + acao.codigo + ".")
             else:
                 print("Não existe Nome de API para ação: " + acao.codigo)
         self.dbConn.session.commit()
 
     def extrairValorCotacao(self, msg):
-        if self.api_key == 'API_INFOM':
-            result = re.search(r'\<div class\=\"value\"\>\n                                    \<p\>[0-9\,]*\<\/p\>',
-                               msg).group()
-            result = re.split(r'\<p\>|\<\/p\>', result)[1]
-        elif self.api_key == 'API_INVES':
-            result = re.search(r'id\=\"last\_last\" dir\=\"ltr\"\>[0-9\,]*\<\/span\>',
-                               msg).group()
-            result = re.split(r'\>|\<\/span\>', result)[1]
+        try:
+            if self.api_key == 'API_INFOM':
+                result = re.search(r'\<div class\=\"value\"\>\n                                    \<p\>[0-9\,]*\<\/p\>',
+                                   msg).group()
+                result = re.split(r'\<p\>|\<\/p\>', result)[1]
+            elif self.api_key == 'API_INVES':
+                result = re.search(r'data-test\=\"instrument-price-last\"\>[0-9\,]*\<\/span\>',
+                                   msg).group()
+                result = re.split(r'\>|\<\/span\>', result)[1]
+        except Exception as ex:
+            print(ex)
+            result = ""
         return result
 
     def extrairHoraAtualizacao(self, msg):
@@ -102,9 +107,10 @@ class BuscaCotacoes:
                 result = result.split('.')[0]
                 result = result.replace('h', ':')
             elif self.api_key == 'API_INVES':
-                result = re.search(r'\-time\"\>[0-9\:]*\<\/span\>', msg).group()
-                result = re.split(r'\>|\<\/span\>', result)[1]
-        except:
+                result = re.search(r'Z\"\>[0-9\:]*\<\/time\>', msg).group()
+                result = re.split(r'\>|\<\/time\>', result)[1]
+        except Exception as ex:
+            print(ex)
             result = ""
         return result
 

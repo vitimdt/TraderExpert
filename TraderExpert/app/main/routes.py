@@ -1,11 +1,16 @@
 from flask import render_template, request, url_for, redirect, flash, jsonify
 from app import db
 from app.main import bp
-from app.entities.Entities import CotacaoTempoReal, Monitoramento, Carteira
+from app.entities.Entities import CotacaoTempoReal, Monitoramento, Carteira, AcessoAPI, Configuracao, Acao
 from app.main.forms.configMonitorForm import ConfigMonitorForm
 from app.main.forms.monitoramentoForm import MonitoramentoForm
 from app.main.forms.carteiraForm import CarteiraForm
 from app.main.forms.acaoCarteiraForm import AcaoCarteiraForm
+from app.main.forms.acessoAcoesForm import AcessoAcoesForm
+from app.main.forms.manterAcessoAcaoForm import ManterAcessoAcaoForm
+from app.main.forms.cadastrarAcoesForm import CadastrarAcoesForm
+from app.main.forms.manterConfiguracao import ManterConfiguracaoForm
+from app.main.forms.configuracoesForm import ConfiguracoesForm
 
 
 @bp.route('/traderexpert/', methods=['GET'])
@@ -43,12 +48,11 @@ def configmonitor():
         monitorsel = params["monitorSel"]
         if monitorsel != "0":
             id = str(monitorsel).split('_')[1]
+            monitoramento = obj_monitoramento.find_by_id(id_monitoramento=int(id))
         else:
             id = "0"
     if monitor_form.validate_on_submit():
-        if id != "0":
-            monitoramento = obj_monitoramento.find_by_id(id_monitoramento=int(id))
-        else:
+        if id == "0":
             monitoramento = Monitoramento()
         monitoramento.acao_id = monitor_form.acao.data
         monitoramento.valor_ref = monitor_form.valor_ref.data.replace(',', '.')
@@ -82,6 +86,7 @@ def todosmonitores():
     cols, rs = Monitoramento.todosMonitoramentos()
     return render_template('monitores.html', title='Monitoramentos', form=form, columns=cols, items=rs)
 
+
 @bp.route('/traderexpert/removermonitor', methods=['GET'])
 def removermonitor():
     id_monitor = request.args.get('monitorid')
@@ -91,6 +96,66 @@ def removermonitor():
     form = MonitoramentoForm()
     cols, rs = Monitoramento.todosMonitoramentos()
     return render_template('_monitores.html', form=form, columns=cols, items=rs)
+
+
+@bp.route('/traderexpert/acessoacoes', methods=['GET'])
+def acessoacoes():
+    form = AcessoAcoesForm()
+    cols, rs = AcessoAPI.retornarAcessosAPI()
+    return render_template('acessoAcoes.html', title='Ações Cadastradas', form=form, columns=cols, items=rs)
+
+
+@bp.route('/traderexpert/manteracessoacao', methods=['GET', 'POST'])
+def manteracessoacao():
+    acessoacao_form = ManterAcessoAcaoForm()
+    obj_acessoApi = AcessoAPI()
+    acessoApi = None
+    id = "0"
+    params = request.args
+    if "acessoSel" in params:
+        acessoSel = params["acessoSel"]
+        if acessoSel != "0":
+            id = str(acessoSel).split('_')[1]
+            acessoApi = obj_acessoApi.find_by_id(idAcessoAPI=int(id))
+        else:
+            id = "0"
+    if acessoacao_form.validate_on_submit():
+        if id == "0":
+            acessoApi = AcessoAPI()
+            acessoApi.acao_id = acessoacao_form.acao.data
+            acessoApi.api_id = acessoacao_form.API.data
+        acessoApi.nome_api = acessoacao_form.nome_api.data
+        if id == "0":
+            acessoAux = obj_acessoApi.find_by_idAcao_idAPI(idAcao=acessoApi.acao_id, idAPI=acessoApi.api_id)
+            if acessoAux is None:
+                db.session.add(acessoApi)
+            else:
+                error = 'Já existe o acesso ação cadastrado no sistema.'
+                acessoacao_form.nome_api.data = ""
+                return render_template('manterAcessoAcao.html', title='Manter Acesso Ação',
+                                       form=acessoacao_form, error=error)
+        db.session.commit()
+        flash('Suas alterações foram gravadas com sucesso.')
+        return redirect(url_for('main.manteracessoacao'))
+    elif request.method == 'GET':
+        if id != "0":
+            acessoApi = obj_acessoApi.find_by_id(idAcessoAPI=int(id))
+            acessoacao_form.acao.data = str(acessoApi.acao_id)
+            acessoacao_form.API.data = str(acessoApi.api_id)
+            acessoacao_form.nome_api.data = acessoApi.nome_api
+    return render_template('manterAcessoAcao.html', title='Manter Acesso Ação', form=acessoacao_form)
+
+
+@bp.route('/traderexpert/removeracessoacao', methods=['GET'])
+def removeracessoacao():
+    id_acesso = request.args.get('acessoid')
+    itemAcesso = AcessoAPI.query.filter_by(id=id_acesso).first_or_404()
+    db.session.delete(itemAcesso)
+    db.session.commit()
+    form = AcessoAcoesForm()
+    cols, rs = AcessoAPI.retornarAcessosAPI()
+    return render_template('_acessoAcoes.html', form=form, columns=cols, items=rs)
+
 
 @bp.route('/traderexpert/minhacarteira', methods=['GET'])
 def minhacarteira():
@@ -110,12 +175,11 @@ def mantercarteira():
         carteira_sel = params["carteiraSel"]
         if carteira_sel != "0":
             id = str(carteira_sel).split('_')[1]
+            acao_carteira = obj_carteira.find_by_id(id_carteira=int(id))
         else:
             id = "0"
     if carteira_form.validate_on_submit():
-        if id != "0":
-            acao_carteira = obj_carteira.find_by_id(id_carteira=int(id))
-        else:
+        if id == "0":
             acao_carteira = Carteira()
         acao_carteira.acao_id = carteira_form.acao.data
         acao_carteira.email = carteira_form.email.data
@@ -142,6 +206,85 @@ def mantercarteira():
     return render_template('manterAcaoCarteira.html', title='Manter Carteira', form=carteira_form)
 
 
+@bp.route('/traderexpert/cadastraracoes', methods=['POST', 'GET'])
+def cadastraracoes():
+    form = CadastrarAcoesForm()
+    obj_acao = Acao()
+    if form.validate_on_submit():
+        obj_acao.codigo = form.codigo_acao.data
+        obj_acao.nome = form.nome_acao.data
+        acaoAux = obj_acao.find_by_code(codigo=obj_acao.codigo)
+        if acaoAux is None:
+            db.session.add(obj_acao)
+        else:
+            error = 'Já existe o código de ação ( ' + obj_acao.codigo + ') cadastrado no sistema.'
+            form.codigo_acao.data = ""
+            form.nome_acao.data = ""
+            return render_template('cadastrarAcoes.html', title='Cadastrar Ações', form=form, error=error)
+        db.session.commit()
+        flash('Suas alterações foram gravadas com sucesso.')
+        return redirect(url_for('main.manteracessoacao'))
+    return render_template('cadastrarAcoes.html', title='Cadastrar Ações', form=form)
+
+
+@bp.route('/traderexpert/configuracoes', methods=['GET'])
+def configuracoes():
+    form = ConfiguracoesForm()
+    cols, rs = Configuracao.retornarConfiguracoes()
+    return render_template('configuracoes.html', title='Configurações', form=form, columns=cols, items=rs)
+
+
+@bp.route('/traderexpert/removerconfiguracao', methods=['GET'])
+def removerconfiguracao():
+    id_config = request.args.get('configid')
+    itemConfig = Configuracao.query.filter_by(id=id_config).first_or_404()
+    db.session.delete(itemConfig)
+    db.session.commit()
+    form = ConfiguracoesForm()
+    cols, rs = Configuracao.retornarConfiguracoes()
+    return render_template('_configuracoes.html', form=form, columns=cols, items=rs)
+
+
+@bp.route('/traderexpert/manterconfiguracao', methods=['GET', 'POST'])
+def manterconfiguracao():
+    form = ManterConfiguracaoForm()
+    obj_config = Configuracao()
+    config = None
+    id = "0"
+    params = request.args
+    if "configSel" in params:
+        config_sel = params["configSel"]
+        if config_sel != "0":
+            id = str(config_sel).split('_')[1]
+            config = obj_config.find_by_id(idConfig=int(id))
+            form.chave.data = config.chave
+        else:
+            id = "0"
+    if form.validate_on_submit():
+        if id == "0":
+            config = Configuracao()
+            config.chave = form.chave.data
+        config.valor = form.valor.data
+        if id == "0":
+            configAux = obj_config.find_by_key(chave=config.chave)
+            if configAux is None:
+                db.session.add(config)
+            else:
+                error = 'Já existe a chave (' + config.chave + ') cadastrada no sistema.'
+                form.chave.data = ""
+                form.valor.data = ""
+                return render_template('manterConfiguracao.html', title='Manter Configuração', form=form, error=error)
+        db.session.commit()
+        flash('Suas alterações foram gravadas com sucesso.')
+        return redirect(url_for('main.configuracoes'))
+    elif request.method == 'GET':
+        if id != "0":
+            config = obj_config.find_by_id(idConfig=int(id))
+            form.chave.data = str(config.chave)
+            form.valor.data = str(config.valor)
+    return render_template('manterConfiguracao.html', title='Manter Configuração', form=form)
+
+
 @bp.route('/traderexpert/removeracao', methods=['GET'])
 def removeracao():
     id_acao = request.args.get('acaoid')
@@ -151,6 +294,7 @@ def removeracao():
     form = CarteiraForm()
     cols, rs = Carteira.retornarCarteira()
     return render_template('_acoesCarteira.html', form=form, columns=cols, items=rs)
+
 
 @bp.route('/traderexpert/notifications')
 def notifications():

@@ -55,8 +55,8 @@
                             <span id="count_acoes" class="badge" style="visibility: hidden;">
                             </span></a>
                     </li>
-                    <!--<li><a href="{{ url_for('main.monitor') }}">Monitoramento</a></li>-->
                     <li><a href="{{ url_for('main.minhacarteira') }}">Minha Carteira</a></li>
+                    <li><a href="{{ url_for('main.acessoacoes') }}">Acesso Ações</a></li>
                 </ul>
 
                 <ul class="nav navbar-nav navbar-right">
@@ -74,11 +74,14 @@
 {% block content %}
     <div class="container">
         {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-info" role="alert">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-info" role="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            {% if error %}
+                <div class="alert alert-danger" role="alert"><strong>Erro:</strong> {{ error }}</div>
+            {% endif %}
         {% endwith %}
 
         {# application content needs to be provided in the app_content block #}

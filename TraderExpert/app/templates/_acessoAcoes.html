@@ -1,20 +1,19 @@
-<table class="table table-striped" id="monitores">
+<table class="table table-striped" id="acessos">
 	 <thead>
-	  {%- for column in columns %}
+	 {%- for column in columns %}
 		{% if (column in ('ID','Excluir')) %}
 		 <th></th>
 		{% else %}
 		 <th>{{ column }}</th>
 		{% endif %}
-	  {%- endfor %}
+	 {%- endfor %}
 	 </thead>
-
 	 <tbody>
 	 {%- for row in items %}
 		<tr>
 		{%- for column in columns %}
 			{% if (column == 'ID') %}
-				<td><input type="checkbox" class="custom-control-input" id="idMon_{{ row[column] }}"></td>
+				<td><input type="checkbox" class="custom-control-input" id="idAcesso_{{ row[column] }}"></td>
 			{% else %}
 				{% if (column == 'Excluir') %}
 					<td>

@@ -3,12 +3,11 @@
 
 {% block scripts %}
   <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
   <script>
 	$(":checkbox").on("click", function(){
 		if ( $(this).prop('checked') ){
 			idSel = $(this).prop('id');
-			$("#carteiraSel").prop('value', idSel);
+			$("#acessoSel").prop('value', idSel);
 			$.each($("input[type='checkbox']"), function(id , val){
 				if ($(val).prop('id') != idSel){
 					$(val).prop('checked', false);
@@ -18,15 +17,15 @@
 	});
 
 	function confirmDelete(id){
-		var ok = confirm("Deseja realmente excluir a ação da sua carteira?");
+		var ok = confirm("Deseja realmente excluir o acesso da ação?");
 		if (ok == true) {
 			$.ajax({
-					url: '/traderexpert/removeracao',
+					url: '/traderexpert/removeracessoacao',
 					type: 'GET',
-					data: {acaoid: id},
+					data: {acessoid: id},
 					success: function(response){
-						$("#acoes_carteira").html(response);
-						$("#carteiraSel").prop('value', '0');
+						$("#acessos_acoes").html(response);
+						$("#acessoSel").prop('value', '0');
 					},
 					error: function(xhr){
 						alert('Request failed :' + xhr.responseText);
@@ -34,19 +33,17 @@
 			});
 		}
     }
-
   </script>
-
 {% endblock %}
 
 {% block app_content %}
-<h2><b>Minha Carteira</b></h2>
+    <h2><b>Acesso Ações</b></h2>
 
-	<div id="acoes_carteira">
-		{% include '_acoesCarteira.html' %}
+	<div id="acessos_acoes">
+		{% include '_acessoAcoes.html' %}
 	</div>
-	<form action="{{ url_for('main.mantercarteira') }}" method="GET">
-		{{ form.carteiraSel() }}
+    <form action="{{ url_for('main.manteracessoacao') }}" method="GET">
+        {{ form.acessoSel() }}
 		<p>{{ wtf.form_field(form.submit, class="btn btn-default pull-right") }}</p>
-	</form>
+    </form>
 {% endblock %}

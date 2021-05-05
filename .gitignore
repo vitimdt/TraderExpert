@@ -118,8 +118,8 @@ ENV/
 env.bak/
 venv.bak/
 *.bat
-*/*.txt
-*.txt
+#*/*.txt
+#*.txt
 
 # Spyder project settings
 #.spyderproject

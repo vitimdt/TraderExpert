@@ -8,7 +8,7 @@ class Acao(db.Model):
     codigo = db.Column(db.String(8))
     nome = db.Column(db.String(70))
 
-    cotacoes = db.relationship('CotacaoTempoReal', backref="acoes")
+    #cotacoes = db.relationship('CotacaoTempoReal', backref="acao")
 
     def __repr__(self):
         return f'Ação {self.nome}'
@@ -35,8 +35,67 @@ class Configuracao(db.Model):
     def __repr__(self):
         return f'Configuração {self.chave}'
 
+    def find_by_id(self, idConfig):
+        return Configuracao.query.filter_by(id=idConfig).first()
+
     def find_by_key(self, chave):
         return Configuracao.query.filter_by(chave=chave).first()
+
+    def retorna_lista_configuracoes(self):
+        configs = Configuracao.query.all()
+        lista = []
+        for config in configs:
+            lista.append((config.id, config.chave))
+        return lista
+
+    @classmethod
+    def retornarConfiguracoes(cls):
+        qry = text("select configuracao.id, configuracao.chave, configuracao.valor from configuracao "
+                   " order by configuracao.chave")
+        columns = ['ID', 'Chave', 'Valor', 'Excluir']
+        configs = db.engine.execute(qry).fetchall()
+        resultSet = []
+        for lin in configs:
+            resultSet.append({columns[0]: lin[0],
+                              columns[1]: lin[1],
+                              columns[2]: lin[2],
+                              columns[3]: lin[0]})
+        return columns, resultSet
+
+class AcessoAPI(db.Model):
+    __tablename__ = 'acessoapi'
+    id = db.Column(db.Integer, primary_key=True)
+    api_id = db.Column(db.Integer, db.ForeignKey('configuracao.id'))
+    acao_id = db.Column(db.Integer, db.ForeignKey('acao.id'))
+    nome_api = db.Column(db.String(255))
+    acao = db.relationship('Acao')
+    api = db.relationship('Configuracao')
+
+    def __repr__(self):
+        return f'AcessoAPI {self.id} - {self.nome_api}'
+
+    def find_by_id(self, idAcessoAPI):
+        return AcessoAPI.query.filter_by(id=idAcessoAPI).first()
+
+    def find_by_idAcao_idAPI(self, idAcao, idAPI):
+        return AcessoAPI.query.filter_by(acao_id=idAcao, api_id=idAPI).first()
+
+    @classmethod
+    def retornarAcessosAPI(cls):
+        qry = text("SELECT acessoapi.id, acao.codigo, acao.nome, configuracao.chave, acessoapi.nome_api "
+                   " FROM acao, configuracao, acessoapi WHERE acao.id = acessoapi.acao_id and "
+                   " acessoapi.api_id = configuracao.id order by acao.codigo")
+        columns = ['ID', 'Código', 'Nome', 'API', 'Acesso API', 'Excluir']
+        acessosApi = db.engine.execute(qry).fetchall()
+        resultSet = []
+        for lin in acessosApi:
+            resultSet.append({columns[0]: lin[0],
+                              columns[1]: lin[1],
+                              columns[2]: lin[2],
+                              columns[3]: lin[3],
+                              columns[4]: lin[4],
+                              columns[5]: lin[0]})
+        return columns, resultSet
 
 class CotacaoTempoReal(db.Model):
     __tablename__ = 'cotacao_temporeal'
@@ -62,7 +121,7 @@ class CotacaoTempoReal(db.Model):
 
     @classmethod
     def buscaCotacaoTR(cls):
-        qry = text("SELECT tab.codigo, tab.nome, tab.valor, tab.quantidade, tab.valor_cotacao, tab.DIF, "
+        qry = text("SELECT distinct tab.codigo, tab.nome, tab.valor, tab.quantidade, tab.valor_cotacao, tab.DIF, "
                    "tab.Valor_Total_Invest, tab.Valor_Total_Bolsa, tab.Percentual, tab.data_atualizacao, "
                    "tab.hora_pregao, tab.valor_taxas FROM (SELECT ct.id, a.codigo, a.nome, c.valor, c.quantidade, "
                    "ct.valor as Valor_Cotacao, ct.data_atualizacao, ct.hora_pregao, "
@@ -72,7 +131,8 @@ class CotacaoTempoReal(db.Model):
                    "(c.valor*c.quantidade),2), ' %') as Percentual, c.valor_taxas "
                    "FROM cotacao_temporeal ct, acao a, carteira c "
                    "WHERE ct.acao_id = a.id and c.acao_id = a.id and ct.data_atualizacao = "
-                   "(select max(aux.data_atualizacao) from cotacao_temporeal aux where aux.acao_id = a.id) "
+                   "(select max(aux.data_atualizacao) from cotacao_temporeal aux where aux.acao_id = a.id) and "
+                   "ct.hora_pregao = (select max(aux.hora_pregao) from cotacao_temporeal aux where aux.acao_id = a.id)"
                    ") AS tab ORDER BY tab.id")
         columns = ['Código', 'Nome', 'Valor Compra', 'Quantidade', 'Cotação', 'Diferença',
                    'Investimento', 'Total Cotação', 'Percentual', 'Hora Atualização', 'Hora Cotação']

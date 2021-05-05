@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block scripts %}
+  <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+  <script>
+      function verificaForm(){
+        if ($("#valor").prop('value') != ''){
+            $("#chave").prop('disabled', true);
+        }
+      }
+      verificaForm();
+  </script>
+{% endblock %}
+
+{% block app_content %}
+    <h2><b>Manter Configuração</b></h2>
+    <a href="{{ url_for('main.configuracoes') }}" class="btn btn-default pull-right">Voltar</a><br>
+
+    <form action="" method="POST">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.chave.label }}<br>
+            {{ form.chave(size=50) }}<br>
+        </p>
+        <p>
+            {{ form.valor.label }}<br>
+            {{ form.valor(size=100) }}<br>
+        </p>
+
+        <p>{{ wtf.form_field(form.submit, class="btn btn-default pull-left") }}</p>
+    </form>
+{% endblock %}

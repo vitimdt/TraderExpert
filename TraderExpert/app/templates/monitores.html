@@ -25,6 +25,7 @@
 					data: {monitorid: id},
 					success: function(response){
 						$("#area_monitores").html(response);
+						$("#monitorSel").prop('value', '0');
 					},
 					error: function(xhr){
 						alert('Request failed :' + xhr.responseText);

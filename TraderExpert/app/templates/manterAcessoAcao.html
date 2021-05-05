@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block scripts %}
+  <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+  <script>
+      function verificaForm(){
+        if ($("#nome_api").prop('value') != ''){
+            $("#acao").prop('disabled', true);
+            $("#API").prop('disabled', true);
+        }
+      }
+      verificaForm();
+  </script>
+{% endblock %}
+
+{% block app_content %}
+    <h2><b>Manter Acesso Ação</b></h2>
+    <a href="{{ url_for('main.acessoacoes') }}" class="btn btn-default pull-right">Voltar</a>
+    <a href="{{ url_for('main.configuracoes') }}" class="btn btn-default pull-right">Configurações</a>
+    <a href="{{ url_for('main.cadastraracoes') }}" class="btn btn-default pull-right">Cadastrar Ações</a><br>
+    <form action="" method="POST">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.acao.label }}<br>
+            {{ form.acao(size=1) }}<br>
+        </p>
+        <p>
+            {{ form.API.label }}<br>
+            {{ form.API(size=1) }}<br>
+        </p>
+        <p>
+            {{ form.nome_api.label }}<br>
+            {{ form.nome_api(size=70) }}<br>
+            {% for error in form.nome_api.errors %}
+                {% if (error != 'This field is required.') %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endif %}
+            {% endfor %}
+        </p>
+
+        <p>{{ wtf.form_field(form.submit, class="btn btn-default pull-left") }}</p>
+    </form>
+{% endblock %}
