@@ -9,7 +9,7 @@
 	 {%- for row in items %}
 		<tr>
 		{%- for column in columns %}
-			{% if (column in ("Diferença", "Percentual")) %}
+			{% if (column in ("Diferença", "Percentual", "Diferença Total")) %}
 				{% if (row[column].find("-") == -1) %}
 					<td style="font-weight:bold; color: blue;" >{{ row[column] }}</td>
 				{% else %}

@@ -135,7 +135,8 @@ class CotacaoTempoReal(db.Model):
                    "ct.hora_pregao = (select max(aux.hora_pregao) from cotacao_temporeal aux where aux.acao_id = a.id)"
                    ") AS tab ORDER BY tab.id")
         columns = ['Código', 'Nome', 'Valor Compra', 'Quantidade', 'Cotação', 'Diferença',
-                   'Investimento', 'Total Cotação', 'Percentual', 'Hora Atualização', 'Hora Cotação']
+                   'Investimento', 'Total Cotação', 'Percentual', 'Diferença Total',
+                   'Hora Atualização', 'Hora Cotação']
         cotacoesTR = db.engine.execute(qry).fetchall()
         resultSet = []
         totInvest = 0
@@ -152,8 +153,9 @@ class CotacaoTempoReal(db.Model):
                               columns[6]: str(lin[6]).replace('.', ','),
                               columns[7]: str(lin[7]).replace('.', ','),
                               columns[8]: str(lin[8]).replace('.', ','),
-                              columns[9]: lin[9].strftime("%d/%m/%Y %H:%M:%S"),
-                              columns[10]: lin[10]})
+                              columns[9]: str(round(lin[7] - lin[6], 2)).replace('.', ','),
+                              columns[10]: lin[9].strftime("%d/%m/%Y %H:%M:%S"),
+                              columns[11]: lin[10]})
         totais = []
         totais.append(str(round(totInvest, 2)).replace('.', ','))
         totais.append(str(round(totCotacao, 2)).replace('.', ','))
