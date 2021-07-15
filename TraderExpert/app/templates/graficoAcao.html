@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block scripts %}
+  <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+{% endblock %}
+
+{% block app_content %}
+    <h2><b>Histórico da {{ cod_acao }}</b></h2>
+    <a href="{{ url_for('main.historicoacoes') }}" class="btn btn-default pull-right">Voltar</a>
+
+    <img src="/grafico.png" alt="Chart" height="550" width="1200">
+{% endblock %}

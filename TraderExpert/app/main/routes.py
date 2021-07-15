@@ -1,6 +1,10 @@
-from flask import render_template, request, url_for, redirect, flash, jsonify
-from app import db
+from flask import render_template, request, url_for, redirect, flash, jsonify, Response, session
+import io
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+from app import db, Config
 from app.main import bp
+from app.entities.HistoricoAcao import HistoricoAcao
 from app.entities.Entities import CotacaoTempoReal, Monitoramento, Carteira, AcessoAPI, Configuracao, Acao
 from app.main.forms.configMonitorForm import ConfigMonitorForm
 from app.main.forms.monitoramentoForm import MonitoramentoForm
@@ -11,6 +15,7 @@ from app.main.forms.manterAcessoAcaoForm import ManterAcessoAcaoForm
 from app.main.forms.cadastrarAcoesForm import CadastrarAcoesForm
 from app.main.forms.manterConfiguracao import ManterConfiguracaoForm
 from app.main.forms.configuracoesForm import ConfiguracoesForm
+from app.main.forms.historicoAcoesForm import HistoricoAcoesForm
 
 
 @bp.route('/traderexpert/', methods=['GET'])
@@ -294,6 +299,36 @@ def removeracao():
     form = CarteiraForm()
     cols, rs = Carteira.retornarCarteira()
     return render_template('_acoesCarteira.html', form=form, columns=cols, items=rs)
+
+
+@bp.route('/traderexpert/historicoacoes', methods=['GET', 'POST'])
+def historicoacoes():
+    form = HistoricoAcoesForm()
+    session['cod_acao'] = None
+    if form.validate_on_submit():
+        session['cod_acao'] = form.acao.data
+        return redirect(url_for('main.graficoacao'))
+    return render_template('historicoAcao.html', title='Histórico de Ações', form=form)
+
+
+@bp.route('/traderexpert/graficoacao', methods=['GET'])
+def graficoacao():
+    codAcao = session['cod_acao']
+    return render_template('graficoAcao.html', title='Gráfico Ação', cod_acao=codAcao)
+
+@bp.route('/grafico.png')
+def grafico_png():
+    historico = HistoricoAcao()
+    codAcao = session['cod_acao']
+    historico.buscarHistorico(codAcao=codAcao, urlAPI=Config.URL_HISTORICO_ACOES, keyAPI=Config.KEY_API)
+    fig = Figure()
+    axis = fig.add_subplot(1, 1, 1)
+    axis.plot(historico.arrDia, historico.arrCotacao)
+    axis.set_xlabel("Data")
+    axis.set_ylabel("Preço (R$)")
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return Response(output.getvalue(), mimetype='image/png')
 
 
 @bp.route('/traderexpert/notifications')
