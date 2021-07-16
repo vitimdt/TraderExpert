@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, SubmitField, DateField, IntegerField
+from wtforms import StringField, SelectField, SubmitField, IntegerField
+from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Length, Regexp
 from app.entities.Entities import Acao
 
