@@ -305,8 +305,12 @@ def removeracao():
 def historicoacoes():
     form = HistoricoAcoesForm()
     session['cod_acao'] = None
+    session['data_inicial'] = None
+    session['data_final'] = None
     if form.validate_on_submit():
         session['cod_acao'] = form.acao.data
+        session['data_inicial'] = form.data_inicial.data
+        session['data_final'] = form.data_final.data
         return redirect(url_for('main.graficoacao'))
     return render_template('historicoAcao.html', title='Histórico de Ações', form=form)
 
@@ -320,7 +324,10 @@ def graficoacao():
 def grafico_png():
     historico = HistoricoAcao()
     codAcao = session['cod_acao']
-    historico.buscarHistorico(codAcao=codAcao, urlAPI=Config.URL_HISTORICO_ACOES, keyAPI=Config.KEY_API)
+    dataInicial = session['data_inicial']
+    dataFinal = session['data_final']
+    historico.buscarHistorico(codAcao=codAcao, dataInicial=dataInicial, dataFinal=dataFinal,
+                              urlAPI=Config.URL_HISTORICO_ACOES, keyAPI=Config.KEY_API)
     fig = Figure()
     axis = fig.add_subplot(1, 1, 1)
     axis.plot(historico.arrDia, historico.arrCotacao)
