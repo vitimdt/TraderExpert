@@ -2,6 +2,9 @@ from flask import render_template, request, url_for, redirect, flash, jsonify, R
 import io
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import numpy as np
 from app import db, Config
 from app.main import bp
 from app.entities.HistoricoAcao import HistoricoAcao
@@ -322,17 +325,24 @@ def graficoacao():
 
 @bp.route('/grafico.png')
 def grafico_png():
+    plt.style.use(style='ggplot')
     historico = HistoricoAcao()
     codAcao = session['cod_acao']
     dataInicial = session['data_inicial']
     dataFinal = session['data_final']
     historico.buscarHistorico(codAcao=codAcao, dataInicial=dataInicial, dataFinal=dataFinal,
                               urlAPI=Config.URL_HISTORICO_ACOES, keyAPI=Config.KEY_API)
-    fig = Figure()
+    fig = Figure(figsize=(11, 7))
     axis = fig.add_subplot(1, 1, 1)
+    y_mean = [np.mean(historico.arrCotacao)] * len(historico.arrDia)
+    x_dates = mdates.date2num(historico.arrDia)
+    z = np.polyfit(x_dates, historico.arrCotacao, 3)
+    y_tend = np.poly1d(z)(x_dates)
     axis.plot(historico.arrDia, historico.arrCotacao)
     axis.set_xlabel("Data")
     axis.set_ylabel("Preço (R$)")
+    axis.plot(historico.arrDia, y_mean, linestyle='dashdot')
+    axis.plot(x_dates, y_tend, linestyle='--')
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
