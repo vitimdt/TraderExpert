@@ -1,18 +1,6 @@
 {% extends "baseGrafico.html" %}
 {% import 'bootstrap/wtf.html' as wtf %}
 
-{% block scripts %}
-  <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
-  <style>
-      .container_grafico {
-            width: 100%;
-            height: 100%;
-            padding: 2px;
-            margin: 5px;
-        }
-  </style>
-{% endblock %}
-
 {% block app_content %}
     <h2><b>Histórico da {{ cod_acao }}</b></h2>
     <img src="/grafico.png" alt="Chart" height="530" width="1500">
