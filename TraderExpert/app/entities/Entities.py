@@ -17,7 +17,7 @@ class Acao(db.Model):
         return Acao.query.all()
 
     def retorna_lista_acoes(self):
-        acoes = Acao.query.all()
+        acoes = Acao.query.order_by(text("nome asc")).all()
         lista = []
         for acao in acoes:
             lista.append((acao.id, acao.nome))
@@ -133,7 +133,7 @@ class CotacaoTempoReal(db.Model):
                    "WHERE ct.acao_id = a.id and c.acao_id = a.id and ct.data_atualizacao = "
                    "(select max(aux.data_atualizacao) from cotacao_temporeal aux where aux.acao_id = a.id) and "
                    "ct.hora_pregao = (select max(aux.hora_pregao) from cotacao_temporeal aux where aux.acao_id = a.id)"
-                   ") AS tab ORDER BY tab.id")
+                   ") AS tab ORDER BY tab.DIF DESC")
         columns = ['Código', 'Nome', 'Valor Compra', 'Quantidade', 'Cotação', 'Diferença',
                    'Investimento', 'Total Cotação', 'Percentual', 'Diferença Total',
                    'Hora Atualização', 'Hora Cotação']
