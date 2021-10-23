@@ -9,10 +9,10 @@
 		$(function() {
 			setInterval(function() {
 				$.ajax({
-					url: '/traderexpert/cotacoestr',
+					url: '/traderexpert/cotacoesagrupadastr',
 					type: 'GET',
 					success: function(response){
-						$("#resumoCotacoesTR").html(response);
+						$("#resumoCotacoesAgrupadasTR").html(response);
 					},
 					error: function(xhr){
 						alert('Request failed :' + xhr.responseText);
@@ -24,9 +24,9 @@
 {% endblock %}
 
 {% block app_content %}
-<h2><b>Carteira - Próximo do Tempo Real</b></h2>
-	<a href="{{ url_for('main.cotacaoagrupadatr') }}" class="btn btn-default pull-right">Cotações Agrupadas</a>
-	<div id="resumoCotacoesTR">
-		{% include '_cotacoesTempoReal.html' %}
+<h2><b>Carteira Agrupada - Próximo do Tempo Real</b></h2>
+	<div id="resumoCotacoesAgrupadasTR">
+		{% include '_cotacoesAgrupadasTempoReal.html' %}
 	</div>
+	<a href="{{ url_for('main.index') }}" class="btn btn-default pull-right">Voltar</a>
 {% endblock %}

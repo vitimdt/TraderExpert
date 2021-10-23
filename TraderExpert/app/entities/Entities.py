@@ -166,6 +166,54 @@ class CotacaoTempoReal(db.Model):
             totais.append('0,00')
         return columns, resultSet, totais
 
+    @classmethod
+    def buscaCotacaoAgrupadaTR(cls):
+        qry = text("select ca.codigo, ca.nome, ca.quantidade, ca.valor_medio, ct.valor as valor_cotacao, "
+                   "ca.valor_total, round((ct.valor * ca.quantidade),2) as valor_total_cotacao, "
+                   "round(((ct.valor * ca.quantidade) - ca.valor_total) ,2) as diferenca_total, "
+                   "ct.data_atualizacao, ct.hora_pregao "
+                   "from cotacao_temporeal ct, acao a , "
+                   "(select a.id, a.codigo, a.nome, sum(c.quantidade) as quantidade, "
+                   "round(sum(c.valor_total),2) as valor_total, "
+                   "round((sum(c.valor_total) / sum(c.quantidade)),2) as valor_medio "
+                   "from acao a, carteira c "
+                   "where c.acao_id = a.id "
+                   "group by a.id, a.codigo, a.nome) AS ca "
+                   "where ct.acao_id = a.id and "
+                   "ca.id = ct.acao_id and "
+                   "ct.data_atualizacao = (select max(aux.data_atualizacao) "
+                   "from cotacao_temporeal aux where aux.acao_id = a.id) and "
+                   "ct.hora_pregao = (select max(aux.hora_pregao) from cotacao_temporeal aux where aux.acao_id = a.id) "
+                   "order by ca.nome")
+        columns = ['Código', 'Nome', 'Quantidade', 'Valor Médio', 'Cotação', 'Investimento',
+                   'Total Cotação', 'Diferença Total', 'Hora Atualização', 'Hora Cotação']
+        cotacoesTR = db.engine.execute(qry).fetchall()
+        resultSet = []
+        totInvest = 0
+        totCotacao = 0
+        for lin in cotacoesTR:
+            totInvest += lin[5]
+            totCotacao += lin[6]
+            resultSet.append({columns[0]: lin[0],
+                              columns[1]: lin[1],
+                              columns[2]: lin[2],
+                              columns[3]: str(lin[3]).replace('.', ','),
+                              columns[4]: str(lin[4]).replace('.', ','),
+                              columns[5]: str(lin[5]).replace('.', ','),
+                              columns[6]: str(lin[6]).replace('.', ','),
+                              columns[7]: str(lin[7]).replace('.', ','),
+                              columns[8]: lin[8].strftime("%d/%m/%Y %H:%M:%S"),
+                              columns[9]: lin[9]})
+        totais = []
+        totais.append(str(round(totInvest, 2)).replace('.', ','))
+        totais.append(str(round(totCotacao, 2)).replace('.', ','))
+        totais.append(str(round(totCotacao - totInvest, 2)).replace('.', ','))
+        if totInvest > 0:
+            totais.append(str(round(((totCotacao - totInvest) * 100) / totInvest, 2)).replace('.', ','))
+        else:
+            totais.append('0,00')
+        return columns, resultSet, totais
+
 class Carteira(db.Model):
     __tablename__ = 'carteira'
     id = db.Column(db.Integer, primary_key=True)

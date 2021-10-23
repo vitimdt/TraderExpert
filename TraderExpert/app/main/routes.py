@@ -38,6 +38,22 @@ def cotacoestr():
                            dif_percentual=tot[3])
 
 
+@bp.route('/traderexpert/cotacaoagrupadatr', methods=['GET'])
+def cotacaoagrupadatr():
+    cols, rs, tot = CotacaoTempoReal.buscaCotacaoAgrupadaTR()
+    return render_template('cotacaoAgrupadaTR.html', columns=cols, items=rs,
+                           tot_invest=tot[0], tot_cotacao=tot[1], dif_total=tot[2],
+                           dif_percentual=tot[3])
+
+
+@bp.route('/traderexpert/cotacoesagrupadastr', methods=['GET'])
+def cotacoesagrupadastr():
+    cols, rs, tot = CotacaoTempoReal.buscaCotacaoAgrupadaTR()
+    return render_template('_cotacoesAgrupadasTempoReal.html', columns=cols, items=rs,
+                           tot_invest=tot[0], tot_cotacao=tot[1], dif_total=tot[2],
+                           dif_percentual=tot[3])
+
+
 @bp.route('/traderexpert/monitor', methods=['GET'])
 def monitor():
     form = MonitoramentoForm()
